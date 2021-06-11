@@ -87,16 +87,17 @@ for ll = idx % run loop as many times as aggregates selected
     
     % Allow for refinement of circles by
     % using handles and prompting the user.
-    Pp(ll) = tools.refine_circles(img_cropped, Pp(ll));
+    %Pp(ll) = tools.refine_circles(img_cropped, Pp(ll));
+    Aggs(ll).Pp_manual = Pp(ll); % copy Pp data structure into Aggs
+    Pp(ll) = tools.refine_circles(Aggs, ll);
     
     commandwindow; % return focus to Matlab window
     
     %== Save results =====================================================%
     %   Format output and autobackup data ------------------------%
     disp(' Saving temporary data ...');
-    Aggs(ll).Pp_manual = Pp(ll); % copy Pp data structure into Aggs
+    Aggs(ll).Pp_manual = Pp(ll); % copy Pp data structure into Aggs, again
     Aggs(ll).dp_manual = median(Pp(ll).dp);
-    Aggs(ll).dp = Aggs(ll).dp_manual;
     save(['temp',filesep,'Pp_manual.mat'],'Pp'); % backup Pp
     tools.textdone(2);
     
@@ -104,6 +105,13 @@ for ll = idx % run loop as many times as aggregates selected
     tools.textbar(0);
     tools.textbar(find(ll==idx) / length(idx));
     disp(' ');
+end
+
+% Add standard deviation of dp radii to Aggs
+len = size(Aggs);
+len = len(2);
+for i = 1:len
+    Aggs(i).dp_std = std(Aggs(i).Pp_manual.dp);
 end
 
 close(f0); % close existing figure
