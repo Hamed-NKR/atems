@@ -5,17 +5,28 @@
 %                   roi.Circles objects.
 %=========================================================================%
 
-function [Pp] = refine_circles(img, Pp)
+function [Pp] = refine_circles(Aggs, ll)
 
 % generate new figure for refine circles step
 f0 = figure;
 f0.WindowState = 'maximized';
+a1 = 1;
+if ll > 0
+    % Backtrack to find first row with an image
+    a1 = ll;
+    while isempty(Aggs(a1).image) && a1 > 0
+        a1 = a1 -1;
+    end
+end
+
+img = imcrop(Aggs(a1).image, Aggs(ll).rect);
 
 % display current image
 imagesc(img);
 colormap gray; axis image off;
 
 
+Pp = Aggs(ll).Pp_manual;
 % get particle properties
 radii = Pp.radii;
 centers = Pp.centers;
@@ -26,6 +37,7 @@ pixsize = Pp.dp./(2.*Pp.radii); % get pixel size from radii/dp ratio
 for ii=1:length(radii)
     h(ii) = images.roi.Circle(gca,'Center',centers(ii,:),'Radius',radii(ii));
 end
+
 
 uicontrol('String','Finished',...
     'Callback','uiresume(gcbf)','Position',[20 20 100 40]);
@@ -42,5 +54,9 @@ Pp.centers = vertcat(h(iv).Center);
 Pp.dp = 2.*pixsize.*Pp.radii;
 
 close(f0);
+
+if nargout < 1
+    Pp = [];
+end
 
 end
