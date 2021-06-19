@@ -48,7 +48,7 @@ tools.imshow_binary(imgs{i}, imgs_binary{i});  % overlay
 %== ANALYZE BINARIES ==%
 %   Produces "AGGS" structure. 
 Aggs = agg.analyze_binary( ...
-    imgs_binary, pixsizes, imgs);
+    imgs_binary, pixsizes, imgs, fnames);
 
 
 

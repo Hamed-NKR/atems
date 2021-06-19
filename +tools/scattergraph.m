@@ -5,7 +5,7 @@
 
 %=========================================================================%
 
-function [] = scattergraph()
+function [err] = scattergraph()
 % Run load_all to compile all case files into struct h.
 h = tools.load_all();
 len = size(h);
@@ -13,15 +13,23 @@ len = size(h);
 dp = [];
 dp_manual = [];
 dp_std = [];
+err = struct([]);
+k = 1;
 
 % Iterate over struct h and compile values into dp, dp_manual, and dp_std.
 for i = 1:max(len(1),len(2))
     h_val = h(i).value;
     h_val_size = size(h_val);
+    h_val_name = h(i).name;
     for j = 1:h_val_size(2)
         dp(end+1) = h_val(j).dp;
         dp_manual(end+1) = h_val(j).dp_manual;
         dp_std(end+1) = h_val(j).dp_std;
+        if (dp_manual(end) > dp(end)*1.5 || dp_manual(end) < dp(end)*0.5)
+            err(k).name = h_val_name;
+            err(k).id = h_val(j).id;
+            k = k + 1;
+        end
     end
 end
 
