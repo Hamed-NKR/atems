@@ -60,12 +60,12 @@ for ll = idx % run loop as many times as aggregates selected
         % prompt user to draw first line
         [x,y] = ginput(2);
         Pp(ll).length(jj,1) = pixsize*sqrt((x(2)-x(1))^2+(y(2) - y(1))^2);
-        line([x(1),x(2)],[y(1),y(2)], 'linewidth', 3);
+        line([x(1),x(2)],[y(1),y(2)], 'linewidth', 1);
         
         % prompt user to draw second line
         [a,b] = ginput(2);
         Pp(ll).width(jj,1) = pixsize*sqrt((a(2)-a(1))^2+(b(2) - b(1))^2);
-        line([a(1),a(2)],[b(1),b(2)],'Color', 'r', 'linewidth', 3);
+        line([a(1),a(2)],[b(1),b(2)],'Color', 'r', 'linewidth', 1);
         
         %-- Save center of the primary particle --------------------------%
         Pp(ll).centers(jj,:) = find_centers(x,y,a,b);
