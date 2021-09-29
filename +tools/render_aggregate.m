@@ -161,7 +161,7 @@ function range_out = concatenate_range(range1, range2)
         range_out(1) = range2(1);
     end
     if range1(2) > range2(2)
-        range_out(2) = range_2(2);
+        range_out(2) = range2(2);
     end
 end
 
