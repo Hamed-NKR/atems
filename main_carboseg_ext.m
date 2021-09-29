@@ -13,7 +13,7 @@ clc;
 
 
 % Load images.
-[Imgs, imgs, pixsizes] = tools.load_imgs('images'); % use 'images' folder
+[Imgs, imgs, pixsizes] = tools.load_imgs(); % use 'images' folder
 fnames = {Imgs.fname}; % cell array of file names
 
 
@@ -45,3 +45,7 @@ opts.cmap = [139, 10, 165] ./ 255; % red overlay
 tools.imshow_agg(Aggs, [], 1, opts); % tiled plot aggregates
 commandwindow; % return focus to Matlab window
 %=========================================================================%
+
+%== Primary particle sizing ==============================================%
+Aggs = pp.edm_sbs(Aggs);
+Aggs = pp.pcm(Aggs);

@@ -13,11 +13,9 @@ clc;
 
 % [Imgs,imgs,pixsizes] = tools.load_imgs; % OPTION 1: load a single image
 % load('temp/Imgs.mat'); % OPTION 2: load preset Imgs
-[Imgs, imgs, pixsizes] = tools.load_imgs('images'); % OPTION 3: load all images in 'images' folder
-
+[Imgs, imgs, pixsizes] = tools.load_imgs; % OPTION 3: load all images in 'images' folder
 
 fname = {Imgs.fname}; % cell array of file names
-
 
 
 
@@ -48,7 +46,8 @@ imgs_binary0{length(imgs)} = [];
 
 % Read in manual binary images
 for ii=1:length(imgs)
-    imgs_binary0{ii} = imread(['images/slider/',fname{ii}]);
+    %imgs_binary0{ii} = imread(['images/slider/',fname{ii}]);
+    imgs_binary0{ii} = imread(['./data/NRC-Hamed/2_MiniCAST/binary/',fname{ii}]);
 end
 
 Aggs0 = agg.analyze_binary(imgs_binary0, ...

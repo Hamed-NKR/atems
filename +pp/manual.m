@@ -109,6 +109,7 @@ end
 
 % Add standard deviation of dp radii to Aggs
 len = size(Aggs);
+ass = Aggs
 len = len(2);
 for i = 1:len
     Aggs(i).dp_std = std(Aggs(i).Pp_manual.dp);
