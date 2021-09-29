@@ -95,6 +95,8 @@ end
 if ~exist('cmap','var'); cmap = []; end
 if isempty(cmap); cmap = gray; end
 
+img = img / res;
+
 transmissionMap = ...
     exp(-transmissionCoefficient*img);
 %img = rescale(img);
