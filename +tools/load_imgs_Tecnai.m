@@ -21,7 +21,7 @@
 % 
 %  AUTHOR: Timothy Sipkens, 2019-07-04
 
-function [Imgs, imgs, pixsize] = load_imgs(fd, n)
+function [Imgs, imgs, pixsize] = load_imgs_Tecnai(fd, n)
 
 tools.textheader('Loading images');
 
@@ -151,14 +151,20 @@ for jj=1:length(Imgs)
     % When the program reaches a row of only white pixels, removes
     % everything below it (specific to ubc photos). It will do nothing if
     % there is no footer or the footer is not pure white.
-    white = 255; % how white is the background of footer?
+    
+    if isa(Imgs(jj).raw, 'uint16')
+        white = 2^16 - 1; % how white is the background of footer?
+    else
+        white = 2^8 - 1;
+    end
+    
     footer_found = 0; % flag whether footer was found
     
     f_nm = 1;  % flag indicating nanometers (detected below)
     
     % Search for row satisying 
     f_footrow = sum(Imgs(jj).raw, 2) > ...
-    	(0.9 * size(Imgs(jj).raw,2) * white);
+    	(0.9 * size(Imgs(jj).raw, 2) * white);
     ii = find(f_footrow, 1);  % first 90% white row
     
     if ~isempty(ii)  % if found footer satisyfing above
@@ -172,27 +178,80 @@ for jj=1:length(Imgs)
         Imgs(jj).ocr = o1;
 
         % Look for pixel size.
-        pixsize_end = strfind(o1.Text,' nm/pix')-1;
-        if isempty(pixsize_end) % if not found, try nmlpix
-            pixsize_end = strfind(o1.Text,' nmlpix')-1;
-
-            if isempty(pixsize_end)
-                pixsize_end = strfind(o1.Text,' pm/pix')-1; % micrometer
-
-                if isempty(pixsize_end)
-                    pixsize_end = strfind(o1.Text,' pmlpix')-1;
+        pixsize_txt1 = {'nm/pix', 'nm/plx', 'nm/101x',...
+            'um/pix', 'um/plx', 'um/101x'};
+        
+        for kk = 1 : length(pixsize_txt1)
+            pixsize_end = strfind(o1.Text, pixsize_txt1(kk)) - 1;
+            if ~isempty(pixsize_end)
+                if contains(pixsize_txt1(kk), 'um')
+                    f_nm = 0;
                 end
-                f_nm = 0;
+                break
             end
         end
-
+        
         % Interpret OCR text and compute pixel size.
-        pixsize_start = strfind(o1.Text,'Cal')+5;
-        Imgs(jj).pixsize = str2double(...
-            o1.Text(pixsize_start:pixsize_end));
+        pixsize_txt2 = {'Cal:', 'cal:', 'Ca1:', 'ca1:', 'CaI:', 'caI:',...
+             'Cal-', 'cal-', 'Ca1-', 'ca1-', 'CaI-', 'caI-',...
+             'Cal''', 'cal''', 'Ca1''', 'ca1''', 'CaI''', 'caI''',...
+             'Cal"', 'cal"', 'Ca1"', 'ca1"', 'CaI"', 'caI"',...
+             'Cal ', 'cal ', 'Ca1 ', 'ca1 ', 'CaI ', 'caI ',};
+        
+        for kk = 1 : length(pixsize_txt2)
+            pixsize_start = strfind(o1.Text, pixsize_txt2(kk)) + 5;
+            if ~isempty(pixsize_start)
+                break
+            end
+        end
+        
+        pixpick = pixsize_end - 2;
+        while isempty(pixsize_start)
+            if isnan(str2double(o1.Text(pixpick))) &&...
+                    (o1.Text(pixpick - 2) == ' ') ||...
+                    (o1.Text(pixpick - 2) == newline)
+                    pixsize_start = pixpick - 1;
+                    break
+            end
+            pixpick = pixpick - 1;
+        end
+        
+        o1_Text = o1.Text(pixsize_start:pixsize_end);
+        if isnan(str2double(o1_Text))
+            o1_Text = strrep(o1_Text, 'o', '0');
+            o1_Text = strrep(o1_Text, 'O', '0');
+            o1_Text = strrep(o1_Text, '‘', '');
+            I_chk = strfind(o1_Text, 'I');
+            if I_chk == 2
+                o1_Text = strrep(o1_Text, 'I', '.');
+            else
+                o1_Text = strrep(o1_Text, 'I', '1');
+            end
+            l_chk = strfind(o1_Text, 'l');
+            if l_chk == 2
+                o1_Text = strrep(o1_Text, 'l', '.');
+            else
+                o1_Text = strrep(o1_Text, 'l', '1');
+            end
+            T_chk = strfind(o1_Text, 'T');
+            if T_chk == 2
+                o1_Text = strrep(o1_Text, 'T', '.');
+            else
+                o1_Text = strrep(o1_Text, 'T', '1');
+            end
+            spc_chk = strfind(o1_Text, ' ');
+            if spc_chk == 2
+                o1_Text = strrep(o1_Text, ' ', '.');
+            else
+                o1_Text = strrep(o1_Text, ' ', '');
+            end
+        end
+        
+        Imgs(jj).pixsize = str2double(o1_Text);
 
         % If given in micrometers, convert.
-        if f_nm==0; Imgs(jj).pixsize = Imgs(jj).pixsize*1e3; end
+        if f_nm == 0; Imgs(jj).pixsize = Imgs(jj).pixsize*1e3; end
+        
     end
     
     
