@@ -11,7 +11,6 @@
 %=========================================================================%
 
 function [dp, h, j] = hdf_histogram()
-    close all;
     % Preserve the original location
     start_path = pwd;
     
@@ -22,7 +21,8 @@ function [dp, h, j] = hdf_histogram()
     % Read h5 file
     dp = h5read(baseFileName, '/NEO/ParticleData/Size_um');
     seconds = h5read(baseFileName, '/NEO/ParticleData/Seconds');
-    t = seconds(end) - seconds(1);
+    
+    t = seconds(end) - seconds(1)
     
     % Convert from # of particles to particles/L
     conc = size(dp)/0.3*60/t;
@@ -39,7 +39,7 @@ function [dp, h, j] = hdf_histogram()
     hold on;
     xlabel('dp (nm)');
     ylabel('Number of particles');
-    title('Primary particle size count');
+    title('Particle size count');
     set(gca, 'XScale', 'log');
     
     % Normalize values to concentration in particles/L.
@@ -55,10 +55,11 @@ function [dp, h, j] = hdf_histogram()
     subplot(2,1,2);
     j = bar(binEdges(1:end-1), jvals, 'r');
     
-    title('Primary particle size distribution');
+    title('Particle size distribution');
     xlabel('dp (nm)');
-    ylabel('d(n)/d(log(dp))');
+    ylabel({'Normalized concentration', 'd(n)/d(log(dp)) (# particles/L)'});
     set(gca, 'XScale', 'log');
+    set(gca, 'FontSize', 20);
     hold off;
     cd(start_path);
 end

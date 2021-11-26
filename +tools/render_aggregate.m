@@ -11,12 +11,13 @@
 % Darwin Zhu, 2021-09-26
 %=========================================================================%
 
-function img = render_aggregate(Aggs, xlim, ylim, res, cmap)
+function transmissionMap = render_aggregate(Aggs, xlim, ylim, res, blur, cmap)
 
 x_size = xlim(2) - xlim(1) + 1;
 y_size = ylim(2) - ylim(1) + 1;
 
 transmissionCoefficient = 0.005;
+noiseCoefficient = 0.25;
 
 img = zeros(x_size, y_size);
 img_low = cell(x_size, y_size);
@@ -51,8 +52,8 @@ y_max = 0;
 for k = 1:Aggs_size
     coords = Aggs(k).coords * res;
     dp = Aggs(k).dp * res;
-    x_range_local = [coords(1) - dp, coords(1) + dp];
-    y_range_local = [coords(2) - dp, coords(2) + dp];
+    x_range_local = [round(coords(1) - dp), round(coords(1) + dp)];
+    y_range_local = [round(coords(2) - dp), round(coords(2) + dp)];
     x_range_local = concatenate_range(x_range_local, xlim);
     y_range_local = concatenate_range(y_range_local, ylim);
     x_range_local = x_range_local - xlim(1) + 1;
@@ -95,10 +96,31 @@ end
 if ~exist('cmap','var'); cmap = []; end
 if isempty(cmap); cmap = gray; end
 
+
+if ~exist('blur','var'); blur = 0; end
+
 img = img / res;
 
 transmissionMap = ...
     exp(-transmissionCoefficient*img);
+
+%first noise layer
+transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
+
+%Blur image
+if blur ~= 0
+    transmissionMap = tools.blur(transmissionMap, blur);
+    
+end
+% Blur 
+transmissionMap = imsharpen(transmissionMap, 'Radius', (blur+1)^2);
+
+img_size = size(transmissionMap);
+transmissionMap = max(transmissionMap, 0);
+transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
+
+
+
 %img = rescale(img);
 %img = 1 - img;
 h = imagesc(transmissionMap); % show image

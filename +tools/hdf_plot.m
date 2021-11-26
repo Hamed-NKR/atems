@@ -81,13 +81,13 @@ function [] = hdf_plot()
                 f_xlog = 0;
             end
             
-            % Ask for y-axis property from user.
+            
+        end
+        
+         % Ask for y-axis property from user.
             [indx_y,tf_y] = listdlg('PromptString',{'Select a property to plot on the y-axis.',...
             'Only one file can be selected at a time.',''},...
             'SelectionMode','single','ListString',fields);
-        end
-        
-         
         
         % Only ask once at the beginning if y axis should be in log scale.
         if (f_firstrun == 0)

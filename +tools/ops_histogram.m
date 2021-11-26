@@ -13,7 +13,6 @@
 %=========================================================================%
 
 function [T_table, b, j] = ops_histogram()
-    close all;
     % Preserve the original location
     start_path = pwd;
     

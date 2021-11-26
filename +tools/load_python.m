@@ -6,6 +6,7 @@
 %-- Start python environment ---------------------------------------------%
 tools.textheader('Initializing python');
 
+py_exec = 
 
 py_root = fileparts(py_exec);
 p = getenv('PATH');

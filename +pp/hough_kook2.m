@@ -64,9 +64,9 @@ if isempty(opts)
     opts.self_subt = 0.8; % Self-subtraction level 
     opts.mf = 1; % Median filter [x x] if needed 
     opts.alpha = 0.1; % Shape of the negative Laplacian "unsharp" filter 0->1 0.1
-    opts.rmax = 50; % Maximum radius in pixel
-    opts.rmin = 8; % Minimum radius in pixel (Keep high enough to eliminate dummies)
-    opts.sens_val = 0.75; % the sensitivity (0->1) for the circular Hough transform 
+    opts.rmax = 40; % Maximum radius in pixel
+    opts.rmin = 30; % Minimum radius in pixel (Keep high enough to eliminate dummies)
+    opts.sens_val = 0.9; % the sensitivity (0->1) for the circular Hough transform 
 end
 
 

@@ -27,6 +27,8 @@ function [FL1, FL2, FL3] = hdf_fluor(lim)
     FL1 = FL1(1,:);
     FL3 = h5read(baseFileName, '/NEO/ParticleData/Xe2_FluorPeak');
     FL3 = FL3(2,:);
+    size_um = h5read(baseFileName, '/NEO/ParticleData/Size_um');
+    
    
     global X
     X = categorical({'A','B','C','AB', 'BC', 'AC', 'ABC', 'None'});
@@ -38,7 +40,7 @@ function [FL1, FL2, FL3] = hdf_fluor(lim)
     fig = uifigure;
    
     ax = uiaxes(fig);
-    updateBar(FL1, FL2, FL3, lim, ax);
+    updateBar(FL1, FL2, FL3, lim, ax, size_um);
     
    
     
@@ -48,7 +50,7 @@ function [FL1, FL2, FL3] = hdf_fluor(lim)
     hold on;
     sld1 = uislider(fig, 'Position', [100, 400, 150, 3], ...
         'MajorTicks', [0, 500000, 1000000], ...
-        'ValueChangedFcn', @(sld1, event) updateBar(FL1, FL2, FL3, sld1.Value, ax));
+        'ValueChangedFcn', @(sld1, event) updateBar(FL1, FL2, FL3, sld1.Value, ax, size_um));
     sld1.Limits = [0, 1000000];
     sld1.Value = lim;
     hold off;
@@ -56,7 +58,7 @@ function [FL1, FL2, FL3] = hdf_fluor(lim)
                     
 end
 
-function updateBar(FL1, FL2, FL3, lim, ax) 
+function updateBar(FL1, FL2, FL3, lim, ax, size_um) 
 global X
 global Y
 
@@ -68,30 +70,39 @@ BC = {};
 AC = {};
 ABC = {};
 NONE = {};
+FL_store = {};
 
     for i = 1:length(FL1)
         if lim < FL1(i)
             if lim < FL2(i)
                 if lim < FL3(i)
                     ABC{end+1} = i;
+                    FL_store{end+1} = 7;
                 else
                     AB{end+1} = i;
+                    FL_store{end+1} = 4;
                 end
             elseif lim < FL3(i)
                 AC{end+1} = i;
+                FL_store{end+1} = 6;
             else
                 A{end+1} = i;
+                FL_store{end+1} = 1;
             end
         elseif lim < FL2(i)
             if lim < FL3(i)
                 BC{end+1} = i;
+                FL_store{end+1} = 5;
             else
                 B{end+1} = i;
+                FL_store{end+1} = 2;
             end
         elseif lim < FL3(i)
             C{end+1} = i;
+            FL_store{end+1} = 3;
         else
             NONE{end+1} = i;
+            FL_store{end+1} = 8;
         end
         
     end 
@@ -107,6 +118,7 @@ NONE = {};
     
     setGlobalY([a_size(2), b_size(2), c_size(2), ab_size(2), bc_size(2), ac_size(2), abc_size(2), none_size(2)]);
     bar(ax, X, Y);
+    %scatter(ax, size_um, cell2mat(FL_store), 'ro', 'LineWidth', 2);
 end
 
 function setGlobalY(X)
