@@ -288,7 +288,7 @@ axis padded
 xlim(del_da)
 ylim(del_od)
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-legtxt2 = num2str(od_c, '%1.1f');
+legtxt2 = num2str(ci_c, '%1.1f');
 leg2 = legend(legtxt2, 'Location', 'eastoutside', 'FontName',...
     'SansSerif', 'FontSize', 11);
 leg2.Title.String = 'c (-)';
@@ -311,15 +311,15 @@ axis padded
 xlim(del_ci)
 ylim(del_od)
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-legtxt3 = num2str(od_c, '%1.1f');
+legtxt3 = num2str(da_c, '%1.1f');
 leg3 = legend(legtxt3, 'Location', 'eastoutside', 'FontName',...
     'SansSerif', 'FontSize', 11);
-leg3.Title.String = 'd_a (m)';
+leg3.Title.String = 'd_a (nm)';
 leg3.Title.FontName = 'SansSerif';
 leg3.Title.FontSize = 11;
-xlabel('d_a (m)', 'FontName', 'SansSerif', 'FontSize', 12,...
+xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
-ylabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 
 title(tt, 'Frequency distributions of morphological properties',...
