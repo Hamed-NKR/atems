@@ -143,6 +143,12 @@ for ii=1:length(imgs_binary) % loop through provided images
     CC = bwconncomp(img_binary); % find seperate aggregates
     naggs = CC.NumObjects; % count number of aggregates
     
+    % Background optical depth
+    CC_PixelIdxList = cell2mat(reshape(CC.PixelIdxList, naggs, 1));
+    seg_backgr = img(:);
+    seg_backgr(CC_PixelIdxList) = 0; % segmented background grayscale image
+    I_backgr = mean(seg_backgr); % background image intensity
+    
     
     % If more than 50 aggregates were found, the method likely failed. 
     % Skip this image and continue on. 
@@ -206,8 +212,20 @@ for ii=1:length(imgs_binary) % loop through provided images
         [x,y] = find(img_binary ~= 0);
         Aggs0(jj).center_mass = [mean(x); mean(y)];
         
+        p_c = 2 * sqrt(pi * Aggs0(jj).area); % perimeter of aggregate area-equivalent circle
+        Aggs0(jj).circularity = p_c / Aggs0(jj).perimeter; % Aggregate circulirity (the degree of being close to a circle (=1))
+        
+        agg_grayscale = img(CC.PixelIdxList{1,jj}); % A vector containing the selected aggregate's grascale pixel values
+        % aggregate optical depth metric (1: black, 0: white)
+        if isa(img, 'uint16')
+            Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^16 - 1);
+        else
+            Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^8 - 1);
+        end
+        
         if f_plot==1; set(groot,'CurrentFigure',f0); tools.imshow_agg(Aggs0, ii, 0); title(num2str(ii)); drawnow; end
     end
+
     
     if f_plot==1; pause(0.05); end % pause very briefly to show overall aggregates
     
