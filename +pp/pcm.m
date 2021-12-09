@@ -117,6 +117,7 @@ for aa = 1:n_aggs % loop over each aggregate in the provided structure
     pcf = pcf ./ denominator; % update pair correlation function
     pcf_smooth = smooth(pcf); % smooth the pair correlation function
     
+    
     % Adjust PCF to be monotonically decreasing.
     for kk=1:(size(pcf_smooth)-1)
         if pcf_smooth(kk) <= pcf_smooth(kk+1)
