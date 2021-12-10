@@ -165,10 +165,10 @@ bc1.CData = cm1;
 box on
 axis padded
 xlim(del_da)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 % a.2. nbar vs ci
@@ -178,10 +178,10 @@ bc2.CData = cm2;
 box on
 axis padded
 xlim(del_ci)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 % a.3. nbar vs od
@@ -191,10 +191,10 @@ bc3.CData = cm3;
 box on
 axis padded
 xlim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('f_n (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 % b. the 2d frequency distribution heatmaps
@@ -205,16 +205,23 @@ box on
 axis padded
 xlim(del_da)
 ylim(del_ci)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 colormap(tt_b1, jet)
 cb1 = colorbar;
 cb1.Label.String = 'f_n (%)';
 cb1.Label.FontName = 'SansSerif';
-cb1.Label.FontSize = 11;
+cb1.Label.FontSize = 12;
+cb1.Label.FontWeight = 'bold';
+cb1.FontName = 'SansSerif';
+cb1.FontSize = 12;
+cb1.Label.Rotation = 0;
+cb1pos = get(cb1,'Position');
+cb1.Label.Position = [4 * cb1pos(1), cb1pos(2) - 2]; % put colorbar...
+    % ...label on top
 
 % b.2. nbar vs da & od 
 tt_b2 = nexttile;
@@ -223,16 +230,22 @@ box on
 axis padded
 xlim(del_da)
 ylim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 colormap(tt_b2, flip(bone))
 cb2 = colorbar;
 cb2.Label.String = 'f_n (%)';
 cb2.Label.FontName = 'SansSerif';
-cb2.Label.FontSize = 11;
+cb2.Label.FontSize = 12;
+cb2.Label.FontWeight = 'bold';
+cb2.FontName = 'SansSerif';
+cb2.FontSize = 12;
+cb2.Label.Rotation = 0;
+cb2pos = get(cb2,'Position');
+cb2.Label.Position = [1.8 * cb2pos(1), cb2pos(2) - 1];
 
 % b.3. nbar vs ci & od
 tt_b3 = nexttile;
@@ -241,16 +254,22 @@ box on
 axis padded
 xlim(del_ci)
 ylim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 colormap(tt_b3, flip(copper))
 cb3 = colorbar;
+cb3.FontName = 'SansSerif';
+cb3.FontSize = 12;
 cb3.Label.String = 'f_n (%)';
 cb3.Label.FontName = 'SansSerif';
-cb3.Label.FontSize = 11;
+cb3.Label.FontSize = 12;
+cb3.Label.FontWeight = 'bold';
+cb3.Label.Rotation = 0;
+cb3pos = get(cb3,'Position');
+cb3.Label.Position = [1.25 * cb3pos(1), cb3pos(2) - 1];
 
 % c. the 3 parameter scatter plots
 % c.1. od colormaps of ci vs da
@@ -264,16 +283,17 @@ box on
 axis padded
 xlim(del_da)
 ylim(del_ci)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
 legtxt1 = num2str(od_c, '%1.1f');
-leg1 = legend(legtxt1, 'Location', 'eastoutside', 'FontName',...
-    'SansSerif', 'FontSize', 11);
+leg1 = legend(legtxt1, 'Location', 'eastoutside',...
+    'FontName', 'SansSerif', 'FontSize', 12);
 leg1.Title.String = 'z_o_p_t (-)';
 leg1.Title.FontName = 'SansSerif';
-leg1.Title.FontSize = 11;
-xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 12,...
+leg1.Title.FontSize = 12;
+leg1.Title.FontWeight = 'bold';
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 % c.2. ci colormaps of od vs da
@@ -287,16 +307,17 @@ box on
 axis padded
 xlim(del_da)
 ylim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
 legtxt2 = num2str(ci_c, '%1.1f');
-leg2 = legend(legtxt2, 'Location', 'eastoutside', 'FontName',...
-    'SansSerif', 'FontSize', 11);
+leg2 = legend(legtxt2, 'Location', 'eastoutside',...
+    'FontName', 'SansSerif', 'FontSize', 12);
 leg2.Title.String = 'c (-)';
 leg2.Title.FontName = 'SansSerif';
-leg2.Title.FontSize = 11;
-xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 12,...
+leg2.Title.FontSize = 12;
+leg2.Title.FontWeight = 'bold';
+xlabel('d_a (nm)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 % c.3. da colormaps of od vs ci
@@ -310,16 +331,17 @@ box on
 axis padded
 xlim(del_ci)
 ylim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
-legtxt3 = num2str(da_c, '%1.1f');
-leg3 = legend(legtxt3, 'Location', 'eastoutside', 'FontName',...
-    'SansSerif', 'FontSize', 11);
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+legtxt3 = num2str(round(da_c), '%d');
+leg3 = legend(legtxt3, 'Location', 'eastoutside',...
+    'FontName', 'SansSerif', 'FontSize', 12);
 leg3.Title.String = 'd_a (nm)';
 leg3.Title.FontName = 'SansSerif';
-leg3.Title.FontSize = 11;
-xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+leg3.Title.FontSize = 12;
+leg3.Title.FontWeight = 'bold';
+xlabel('c (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
-ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylabel('z_o_p_t (-)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 
 title(tt, 'Frequency distributions of morphological properties',...
@@ -327,7 +349,7 @@ title(tt, 'Frequency distributions of morphological properties',...
 %%%%%%
 
 if nargout < 3
-    clear h; % delete figure handle if not requested as an output
+    clear h % delete figure handle if not requested as an output
 end
 
 end

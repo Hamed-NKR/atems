@@ -146,7 +146,7 @@ for ii=1:length(imgs_binary) % loop through provided images
     % Background optical depth
     CC_PixelIdxList = cell2mat(reshape(CC.PixelIdxList, naggs, 1));
     seg_backgr = img(:);
-    seg_backgr(CC_PixelIdxList) = 0; % segmented background grayscale image
+    seg_backgr(CC_PixelIdxList) = []; % segmented background grayscale image
     I_backgr = mean(seg_backgr); % background image intensity
     
     
