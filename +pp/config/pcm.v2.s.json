@@ -1,0 +1,8 @@
+// VERSION 2.s
+// AUTHOR: Darwin Zhu, 2021-12-09
+{
+    "version": "2.s",
+    "norm": "old",      // type of PCF normalization (max = by max of PCF)
+    "type": "simple"    // what type of diameter to output
+    "risingcut": "true"
+}

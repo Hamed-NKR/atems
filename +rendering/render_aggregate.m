@@ -6,12 +6,32 @@
 %   [XLIM] - Size 2 vector containing x-axis limits on display window
 %   [YLIM] - Size 2 vector containing y-axis limits on display window
 %   [RES] - Resolution of image in pixels per nanometer
+%   [BLUR] - Radius of blur applied to image
+%   [OPTS] - Configuration JSON file
 %   [CMAP] - Image color map (leave empty to set as grey by default)
+%  VERSIONS: 
+%    <strong>2.s</strong>: Simple method, with rising edge cutoff
+%    <strong>1.s</strong>: Default. Simple primary particle method. 
+%         Normalize PCF by maximum. 
+%    <strong>1.g</strong>: General primary particle method. 
+%         Normalize PCF by maximum. 
+%    <strong>0.s</strong>: Simple primary particle method. 
+%         Normalize PCF according to original Dastanpour method. 
 
 % Darwin Zhu, 2021-09-26
 %=========================================================================%
 
-function transmissionMap = render_aggregate(Aggs, xlim, ylim, res, blur, cmap)
+function transmissionMap = render_aggregate(Aggs, xlim, ylim, res, blur, opts, cmap)
+
+%-- Handle options --%
+default_opts = '+rendering/config/rendering.v1.s.json';  % default, load this config file
+if ~exist('opts', 'var'); opts = []; end  % if no opts specified
+if isa(opts, 'char')  % if string, check if folder included
+    if ~strcmp(opts(1:10), '+rendering')
+        opts = ['+rendering/config/rendering.', opts, '.json'];
+    end
+end
+opts = tools.load_config(opts, default_opts);
 
 x_size = xlim(2) - xlim(1) + 1;
 y_size = ylim(2) - ylim(1) + 1;
@@ -104,22 +124,25 @@ img = img / res;
 transmissionMap = ...
     exp(-transmissionCoefficient*img);
 
-%first noise layer
-transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
+if opts.noise
 
-%Blur image
-if blur ~= 0
-    transmissionMap = tools.blur(transmissionMap, blur);
-    
+    %first noise layer
+    transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
+
+    %Blur image
+    if blur ~= 0
+        transmissionMap = tools.blur(transmissionMap, blur);
+
+    end
+    % Blur 
+    transmissionMap = imsharpen(transmissionMap, 'Radius', (blur+1)^2);
+
+    if opts.sharpen
+        img_size = size(transmissionMap);
+        transmissionMap = max(transmissionMap, 0);
+        transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
+    end
 end
-% Blur 
-transmissionMap = imsharpen(transmissionMap, 'Radius', (blur+1)^2);
-
-img_size = size(transmissionMap);
-transmissionMap = max(transmissionMap, 0);
-transmissionMap=transmissionMap - noiseCoefficient.*sqrt(transmissionMap).*normrnd(0.5, 0.1, size(transmissionMap));
-
-
 
 %img = rescale(img);
 %img = 1 - img;

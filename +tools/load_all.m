@@ -1,6 +1,6 @@
-% LOAD_ALL          Navigate to a folder and load all mat files.
+% LOAD_ALL          Navigate to a folder and load all agg struct mat files.
 % 
-% INPUTS: NONE.
+% INPUTS: NONE. Navigate using UI.
 %
 % OUTPUTS: 
 % [FOLDERNAME] = Path containing the folder name and the 2 folders above.

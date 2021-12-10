@@ -1,4 +1,4 @@
-% HISTOGRAM: Displays a histogram of the primary particle sizes.
+% AGGHISTOGRAM: Displays a histogram of the aggregate particle sizes.
 %
 % INPUTS: 
 % [STRUCT] = Aggs structure to plot in the histogram

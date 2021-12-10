@@ -1,6 +1,16 @@
 
 % PCM  Performs the pair correlation method (PCM) of aggregate characterization
 %  
+% INPUTS: 
+%   [AGGS] - Aggregate struct containing binaries to perform PCM on
+%   [F_PLOT] - 1 to generate plot, 0 to skip
+%   [F_BACKUP] - 1 to generate backup file, 0 to skip
+%   [OPTS] - Name of config file to run PCM function on
+%
+% OUTPUTS:
+%   [AGGS] - Aggregate struct updated with dp values from PCM
+%   [PCF_STRUCT] - Struct containing PCF plot and dp values.
+%
 %  Developed at the University of British Columbia by Ramin Dastanpour and
 %  Steven N. Rogak.
 %  
@@ -13,6 +23,7 @@
 %  ------------------------------------------------------------------------
 %  
 %  VERSIONS: 
+%    <strong>2.s</strong>: Simple method, with rising edge cutoff
 %    <strong>1.s</strong>: Default. Simple primary particle method. 
 %         Normalize PCF by maximum. 
 %    <strong>1.g</strong>: General primary particle method. 
@@ -20,7 +31,9 @@
 %    <strong>0.s</strong>: Simple primary particle method. 
 %         Normalize PCF according to original Dastanpour method. 
 
-function [Aggs] = pcm(Aggs, f_plot, f_backup, opts)
+function [Aggs, pcf_struct] = pcm(Aggs, f_plot, f_backup, opts)
+
+pcf_struct = struct;
 
 %-- Parse inputs and load image ------------------------------------------%
 % Choose whether to plot pair correlation functions (PCFs).
@@ -125,7 +138,15 @@ for aa = 1:n_aggs % loop over each aggregate in the provided structure
     pcf = pcf ./ denominator; % update pair correlation function
     pcf_smooth = smooth(pcf); % smooth the pair correlation function
     
-    
+    % Remove points on rising edge
+    if strcomp(opts.risingcut, true) 
+        x = 1;
+        while pcf_smooth(x) < pcf_smooth(x+1) 
+            x = x + 1;
+        end
+        pcf_smooth = pcf_smooth(x:end);
+        r1 = r1(x:end);
+    end
     % Adjust PCF to be monotonically decreasing.
     for kk=1:(size(pcf_smooth)-1)
         if pcf_smooth(kk) <= pcf_smooth(kk+1)
@@ -193,7 +214,8 @@ for aa = 1:n_aggs % loop over each aggregate in the provided structure
         %close all;
     end
     
-    
+    pcf_struct(aa).pcf = pcf_smooth;
+    pcf_struct(aa).dp = Aggs(aa).dp;
 
     %== Step 4: Save results =============================================%
     %   Autobackup data (every ten particles)

@@ -1,0 +1,7 @@
+// VERSION 0.s
+// AUTHOR: Darwin Zhu 2021-12-09
+{
+    "version": "0.s",
+    "sharpen": "false",      // Sharpen on or off
+    "noise": "false"    // Noise on or off
+}
