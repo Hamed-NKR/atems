@@ -16,6 +16,11 @@ function [ff, Aggs, imgs_binary, hf] = analyze_morph(imgs, pixsizes,...
 
 n_imgs = length(imgs); % number of images
 
+if ~(exist('opts', 'var') && isfield(opts, 'sizing') &&...
+        isfield(opts, 'ui'))
+    opts = struct('sizing', [], 'ui', []);
+end
+
 opts_sizing = opts.sizing;
 opts_ui = opts.ui;
 
@@ -295,53 +300,77 @@ cm3 = colormap(winter);
 cm4 = colormap(summer);
 cm5 = colormap(spring);
 
-ff_p = cell2mat(ff) * 100 / n_agg_tot; % concatinate freqs. and convert...
-    % ...to percentage for plotting
+ff2 = cell2mat(ff); % concatinate freqs.
+err = 100 * sqrt(ff2 / n_agg_tot^2 + ff2.^2 / n_agg_tot^3) ./ ff2;
+    % error propagation in percent
+ff2 = 100 * ff2 / n_agg_tot; % relative freq. in percent
 
 % circularity frequency plot
 nexttile(1);
 x1 = categorical({'Irregular', 'Moderate', 'Circular'});
 x1 = reordercats(x1,{'Irregular', 'Moderate', 'Circular'});
-bc1 = bar(x1, ff_p(1:3), 'FaceColor', 'flat');
+bc1 = bar(x1, ff2(1:3), 'FaceColor', 'flat');
 bc1.CData = [cm1(200,:); cm1(110,:); cm1(20,:)];
+hold on
+eb1 = errorbar(x1, ff2(1:3), err(1:3), '.');
+eb1.Color = [0.1 0.1 0.1];
+eb1.CapSize = 5;
+eb1.MarkerSize = 0.1;
 box on
 axis padded
-set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
-ylim([0 100])
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12,...
+    'TickLength', [0.03 0.03])
+
+ylim([0 min(1.1 * (max(ff2(1:3) + err(1:3))), 100)])
 xlabel('Circularity level', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
+hold off
 
 % optical depth frequency plot
 nexttile(4);
 x2 = categorical({'Light', 'Moderate', 'Dark'});
 x2 = reordercats(x2,{'Light', 'Moderate', 'Dark'});
-bc2 = bar(x2, ff_p(4:6), 'FaceColor', 'flat');
-bc2.CData = [cm2(200,:); cm2(110,:); cm2(20,:)];
+bc2 = bar(x2, ff2(4:6), 'FaceColor', 'flat');
+bc2.CData = [cm2(210,:); cm2(130,:); cm2(50,:)];
+hold on
+eb2 = errorbar(x2, ff2(4:6), err(4:6), '.');
+eb2.Color = [0.6350 0.0780 0.1840];
+eb2.CapSize = 5;
+eb2.MarkerSize = 0.1;
 box on
 axis padded
-set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
-ylim([0 100])
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12,...
+    'TickLength', [0.03 0.03])
+ylim([0 min(1.1 * (max(ff2(4:6) + err(4:6))), 100)])
 xlabel('Optical depth level', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
+hold off
 
 % sharpness frequency plot
 nexttile(7);
 x3 = categorical({'Blurry', 'Moderate', 'Sharp'});
 x3 = reordercats(x3,{'Blurry', 'Moderate', 'Sharp'});
-bc3 = bar(x3, ff_p(7:9), 'FaceColor', 'flat');
+bc3 = bar(x3, ff2(7:9), 'FaceColor', 'flat');
 bc3.CData = [cm3(10,:); cm3(110,:); cm3(210,:)];
+hold on
+eb3 = errorbar(x3, ff2(7:9), err(7:9), '.');
+eb3.Color = [0.1 0.1 0.1];
+eb3.CapSize = 5;
+eb3.MarkerSize = 0.1;
 box on
 axis padded
-set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
-ylim([0 100])
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12,...
+    'TickLength', [0.03 0.03])
+ylim([0 min(1.1 * (max(ff2(7:9) + err(7:9))), 100)])
 xlabel('Sharpness level', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
+hold off
 
 % morphological type frequency plot
 nexttile(2, [1,2]);
@@ -349,13 +378,19 @@ x4 = categorical({'Fractal soot', 'Dense soot', 'Coated soot',...
     'Tarball', 'Greyball', 'Hybrid', 'Miscellaneous'});
 x4 = reordercats(x4,{'Fractal soot', 'Dense soot', 'Coated soot',...
     'Tarball', 'Greyball', 'Hybrid', 'Miscellaneous'});
-bc4 = bar(x4, ff_p(10:16), 'FaceColor', 'flat');
+bc4 = bar(x4, ff2(10:16), 'FaceColor', 'flat');
 bc4.CData = [cm4(20,:); cm4(50,:); cm4(80,:); cm4(110,:);...
     cm4(140,:); cm4(170,:); cm4(200,:)];
+hold on
+eb4 = errorbar(x4, ff2(10:16), err(10:16), '.');
+eb4.Color = [0.1 0.1 0.1];
+eb4.CapSize = 5;
+eb4.MarkerSize = 0.1;
 box on
 axis padded
-set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
-ylim([0 100])
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12,...
+    'TickLength', [0.01 0.01])
+ylim([0 min(1.1 * (max(ff2(10:16) + err(10:16))), 100)])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
@@ -363,6 +398,7 @@ ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
 
 title(tt, 'Visually interpreted morphological properties',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
+hold off
 
 if nargout < 4
     clear hf % delete the results figure handle if not requested as an...
@@ -372,21 +408,35 @@ end
 % size frequency plot
 nexttile(5, [2,2]);
 da = cat(1, Aggs.da); % area equivalent diameter
-hda = histogram(da, 10); % frequency histogram of sizes
+x5_edg = min(da) + (max(da) - min(da)) * log(1 : (exp(1) - 1)/10 : exp(1));
+    % lograthmic size binning
+his_da = histogram(da, x5_edg); % frequency histogram of sizes
 x5 = zeros(10,1); % bin middle points
 for i = 1 : 10
-    x5(i) = (hda.BinEdges(i) + hda.BinEdges(i+1));
+    x5(i) = sqrt(his_da.BinEdges(i) * his_da.BinEdges(i+1));
 end
-bc5 = bar(x5, hda.Values, 'FaceColor', 'flat');
+y5 = his_da.Values;
+bc5 = bar(x5, 100 * y5 / n_agg_tot, 'BarWidth', 1, 'FaceColor', 'flat');
 i_bc5 = round(1 + (length(cm5) - 1) .* (0 : 1 / 9 : 1));
 bc5.CData = cm5(i_bc5,:);
+hold on
+err_da = 100 * sqrt(y5 / n_agg_tot^2 + y5.^2 / n_agg_tot^3) ./ y5;
+    % error propagation of size bins
+eb5 = errorbar(x5, 100 * y5 / n_agg_tot, err_da, '.');
+eb5.Color = [0.1 0.1 0.1];
+eb5.CapSize = 5;
+eb5.MarkerSize = 0.1;
 box on
 axis padded
-set(gca, 'FontName', 'SansSerif', 'FontSize', 12)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 12,...
+    'TickLength', [0.01 0.01])
+set(gca, 'XScale', 'log')
+ylim([0 min(1.1 * (max(100 * y5 / n_agg_tot + err_da)), 100)])
 xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 14, 'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 14,...
     'FontWeight', 'bold')
+hold off
 
 title(tt, 'User interpreted morphological properties',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
