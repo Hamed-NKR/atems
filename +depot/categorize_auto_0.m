@@ -1,4 +1,4 @@
-function [Aggs_freq, Aggs_bin, h] = freqdist(Aggs, n_bin)
+function [Aggs_freq, Aggs_bin, h] = categorize_auto_0(Aggs, n_bin)
 % FREQDIST plots frequncy distribution plots of aggregates based on...
 %   ...their different morphological properties (i.e., optical depth,...
 %   ...circularity, and size). 
@@ -33,7 +33,7 @@ del_da = [min(da), max(da)];
 del_ci = [min(ci), max(ci)];
 del_od = [min(od), max(od)];
 
-% Assigning the number of bins if not given
+% assign the number of bins if not given
 if ~exist('n_bin', 'var') || isempty(n_bin)
     n_bin = [5, 5, 5];
 elseif length(n_bin) == 1

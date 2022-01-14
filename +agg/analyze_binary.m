@@ -213,7 +213,7 @@ for ii=1:length(imgs_binary) % loop through provided images
         Aggs0(jj).center_mass = [mean(x); mean(y)];
         
         p_c = 2 * sqrt(pi * Aggs0(jj).area); % perimeter of aggregate area-equivalent circle
-        Aggs0(jj).circularity = p_c / Aggs0(jj).perimeter; % Aggregate circulirity (the degree of being close to a circle (=1))
+        Aggs0(jj).ca = p_c / Aggs0(jj).perimeter; % Aggregate circulirity (the degree of being close to a circle (=1))
         
         agg_grayscale = img(CC.PixelIdxList{1,jj}); % A vector containing the selected aggregate's grascale pixel values
         % aggregate optical depth metric (1: black, 0: white)
