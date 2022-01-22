@@ -1,225 +1,47 @@
-function [fn, Aggs, imgs_binary, hf] =...
-    categorize_semiauto(imgs, n_bin, pixsizes, opts)
+function [fn, hf] = categorize_auto(Aggs, n_bin)
 
-% ANALYZE_MORPH characterizes the aggregates based on their morphological...
-%   ...properties including circularity and optical depth
+% CATEGORIZE_AUTO performs machine-based characterization of the...
+%   ...particles based on their different morphological properties.
 % ----------------------------------------------------------------------- %
-% imgs: cell array of "cropped" grayscale images to be analyzed
-% n_bin: number of post-processing bins (4 member vector for size,...
+% n_bin: numbers of post-processing bins (a 4 member vector for size,...
 %   ...circularity, optical depth, and sharpness; also can be a single...
-%   ...number for all)
-% pixsizes: image pixel sizes
-% opts: options structure
-% fn: A structure containing the frequencies data
-% Aggs: aggregate properties tables
-% imgs_binary: aggregate segmented binary images
-% hf: A structure for figure handles of frequency plots
+%   ...universal number for all)
+% fn: A structure containing the morphological frequency data
+% Aggs: aggregates' table of properties
+% hf: A structure for figure handles of the frequency plots
 % ----------------------------------------------------------------------- %
 
-%% Part1: Categorize the particles %%
+%% Initializations %%
 
-n_imgs = length(imgs); % number of images
-
-if ~(exist('opts', 'var') && isfield(opts, 'sizing') &&...
-        isfield(opts, 'ui'))
-    opts = struct('sizing', [], 'ui', []);
-end
-
-opts_sizing = opts.sizing;
-opts_ui = opts.ui;
-
-if isempty(opts_ui)
-    opts_ui = 'on'; % default to get the user's morphological inputs
-end
-
-if isempty(opts_sizing)
-    opts_sizing = 'manu'; % default to be manual aggregate sizing
-end
-
-% manually segment the aggregates
-if ismember(opts_sizing, {'MANU', 'Manu', 'manu'})
-    imgs_binary = agg.seg_slider(imgs);
-elseif ismember(opts_sizing, {'AUTO', 'Auto', 'auto'})
-    imgs_binary = agg.seg_kmeans(imgs, pixsizes);
-else
-    error(['Invalid sizing option input!', newline,...
-        'Should be ''Manu''/''Auto''.'])
-end
-
-% obtain aggregate properties
-Aggs = agg.analyze_binary(imgs_binary, pixsizes, imgs);
-
-agg_id = cat(1, Aggs.id); % aggregate ids
-img_id = cat(1, Aggs.img_id); % image ids corresponding to the aggregates
-n_agg_i = zeros(n_imgs,1); % initialize number of aggregates within each...
-    % ...image
-n_agg_tot0 = length(Aggs); % total number of aggregates across all images
-
-if ismember(opts_ui, {'ON', 'On', 'on'})
-    opts_ui_bin = 1; % gui checking handle
+n_agg_tot0 = length(Aggs); % total number of aggregates
+fn0 = zeros(n_agg_tot0,5); % array to store bin labels
+fn = struct(); % frequency storage structure
+hf = struct(); % plot storage structure
     
-    % initialize the figure properties for TEM images to be plotted 
-    figure;
-    hf0 = gcf;
-    hf0.Position = [0, 0, 800 * 2, 800]; % Position and size
-    set(hf0, 'color', 'white'); % Background color
-    
-    % set the figure layout 
-    tt0 = tiledlayout(1, 2);
-    tt0.TileSpacing = 'compact';
-    tt0.Padding = 'compact';
-    
-elseif ismember(opts_ui, {'OFF', 'Off', 'off'})
-    opts_ui_bin = 0;
-    morphstr = {'fs', 'cs', 'tb', 'sb', 'h', 'm'};
-    
-else
-    error(['Invalid user interface option input!', newline,...
-        'Should be ''On''/''Off''.'])
-end
-
-fn0 = zeros(n_agg_tot0,5); % initialize array to store bin labels of...
-    % ...different properties
-
-for i = 1 : n_imgs
-    
-    ii = sum(n_agg_i(1 : i-1)) + 1; % global id of the first aggregate...
-        % ...within the image
-    n_agg_i(i) = length(agg_id(img_id == i));
-    
-    if opts_ui_bin
-        tt0_a = nexttile;
-        tools.imshow(Aggs(ii).image); % display the original image
-        title(tt0_a, 'Original TEM image')
-        
-        tt0_b = nexttile;
-    end
-    
-    for j = 1 : n_agg_i(i)
-        jj = sum(n_agg_i(1 : i-1)) + j; % aggregate's global id
-
-        if opts_ui_bin
-            % shade the isolated aggregate area
-            cmap = ones(max(max(Aggs(jj).binary)), 1) * [0.12, 0.59, 0.96];
-            im2 = labeloverlay(Aggs(ii).image, Aggs(jj).binary,...
-                'Transparency', 0.6, 'Colormap', cmap);
-        
-            % display the aggregate edge
-            agg_edge = edge(Aggs(jj).binary, 'sobel'); % capture the edge
-            se = strel('disk',1);
-            edge_dilated = imdilate(agg_edge, se); % strengthen the outline
-            im2 = uint8(~edge_dilated) .* im2; % add borders to labeled regions
-
-            tools.imshow(im2); % display the highlighted aggregate and the edge
-            title(tt0_b, 'Highlighted image')
-        end
-        
-        morph_check = 0; % initialize the checking variable for...
-            % ...the user's inputs
-        
-        while ~all(morph_check) % check if acceptable inputs are provided
-            
-            if opts_ui_bin
-                % request inputs on circulariry and optical depth from the user
-                prompt = {['\fontsize{12}Please enter the',...
-                    '\fontsize{12}\bfMorphological Type:', newline,...
-                    '\fontsize{12}\rm\it(FS/Fs/fs: Fractal soot, Compact soot,',...
-                    '\fontsize{12}\rm\it TB/Tb/tb: Tarball, SB/Sb/sb: Softball, H/h: Hybrid, M/m: Miscellaneous)']};
-                dlgtitle = 'User''s morphological inputs';
-                dims = [1 100];
-                defaultans = {'', '', '', ''};
-                dlgopts.Interpreter = 'tex';
-                morph = inputdlg(prompt, dlgtitle, dims, defaultans, dlgopts);
-                
-            else
-                morph = morphstr{randsample(6,1)};
-            end
-            
-            % feed the inputs to the aggregate properties cell array
-            switch morph % morph. type
-                case {'FS', 'Fs', 'fs'}
-                    fn0(jj,5) = 1;
-                    Aggs(jj).Type = 'Fractal soot';
-                case {'CS', 'Cs', 'cs'}
-                    fn0(jj,5) = 2;
-                    Aggs(jj).Type = 'Compact soot';
-                case {'TB', 'Tb', 'tb'}
-                    fn0(jj,5) = 3;
-                    Aggs(jj).Type = 'Tarball';
-                case {'SB', 'Sb', 'sb'}
-                    fn0(jj,5) = 4;
-                    Aggs(jj).Type = 'Softball';
-                case {'H', 'h'}
-                    fn0(jj,5) = 5;
-                    Aggs(jj).Type = 'Hybrid';
-                case {'M', 'm'}
-                    fn0(jj,5) = 6;
-                    Aggs(jj).Type = 'Miscellaneous';
-                otherwise
-                    % issue warning
-                    warn = questdlg(['Invalid input for morph. type!',...
-                        newline, '(please see the descriptions in the prompt input window)'],...
-                        'warning', 'Continue', 'Cancel', 'Continue');
-                    % handle response
-                    switch warn
-                        case 'continue'
-                            continue
-                        case 'cancel'
-                            warning(['Invalid input for morph. type!', newline,...
-                                '(please see the descriptions in the prompt input window)'])
-                            return
-                    end
-            end
-            morph_check = 1; % morph. type input is valid
-            
-            if opts_ui_bin
-                % clear the highlighted plot to prepare for next aggregate
-                ha0 = gca;
-                cla(ha0)
-            end
-        end
-    end
-    
-    if opts_ui_bin
-        clf(hf0) % clear figure to prepare for the next image
-    end
-end
-
-if opts_ui_bin
-    close(hf0) % close figure
-    clear hf0 % clear figure handle
-end
-
-%% Part 2: Bin the properties %%
-
-% ask what to do next
-quest = questdlg(['Manual segmentation and categorization completed!',...
-    newline, 'Would you like to proceed to automatic categorization?'],...
-    'Next step', 'Continue', 'Finish', 'Continue');
-% handle response
-if strcmp(quest, 'Finish')
-    % save important data first
-    fout = pwd; % default saving address to be in the working directory
-    fout = strcat(fout, '\morphout'); % set the output file folder
-    if ~exist('fout', 'dir')
-        mkdir(fout)
-    end
-    fout = strcat(fout, '\morphdata.mat'); % set the output file name
-    save(fout, 'Aggs', 'imgs_binary'); % save the results in case an...
-        % ...error occurs while plotting
-    
-    % null frequency & plot outputs
-    fn = struct();
-    hf = struct();
-    
-    return
-end
-
-% compile the properties from the aggregate population
+% compile the aggregate (quantitative) properties
 da = cat(1, Aggs.da); % area equivalent diameter
 ca = cat(1, Aggs.ca); % area equivalent circularity
 od = cat(1, Aggs.zbar_opt); % optical depth
-os = rand(n_agg_tot0,1); % cat(1, Aggs.sbar_opt); % optical sharpness
+% cat(1, Aggs.sbar_opt);
+os = rand(n_agg_tot0,1); % optical sharpness
+
+% reload the morphological types
+for m = 1 : 6
+    switch m
+        case 1
+            fn0(strcmp(Aggs.Type, 'Fractal soot'), 5) = m;
+        case 2
+            fn0(strcmp(Aggs.Type, 'Compact soot'), 5) = m;
+        case 3
+            fn0(strcmp(Aggs.Type, 'Tarball'), 5) = m;
+        case 4
+            fn0(strcmp(Aggs.Type, 'Softball'), 5) = m;
+        case 5
+            fn0(strcmp(Aggs.Type, 'Hybrid'), 5) = m;
+        case 6
+            fn0(strcmp(Aggs.Type, 'Miscellaneous'), 5) = m;
+    end
+end
 
 % assign the number of bins if not given
 if ~exist('n_bin', 'var') || isempty(n_bin)
@@ -276,11 +98,8 @@ fn2 = {zeros(n_bin(1), n_bin(2)), zeros(n_bin(1), n_bin(3)),...
 
 
 
-%% 1d frequecies %%
+%% assign to 1d bins %%
 
-% assign the aggregates to the bins and count the frquencies
-
-% size binning
 for i = 1 : n_bin(1)
     if i == 1 % The first bin (only upper limit)
         ii = da < da_bin(i+1);
@@ -345,7 +164,9 @@ for m = 1 : 6
     fn1{5}(m) = nnz(fn0(:,5) == m) / n_agg_tot;
 end
 
-% initialize the 1d frequency plots
+%% Plot 1d frequencies %%
+
+% initialize the figure
 figure;
 hf1 = gcf;
 hf1.Position = [0, 0, 1500, 1000]; % Position and size
@@ -528,9 +349,7 @@ hold off
 title(tt1, 'Frequency of morphological properties',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
-%% 2d frequencies %%
-
-% binning & counting
+%% assign to 2d bins %%
 
 % size distribution vs. circularity
 for i = 1 : n_bin(1)
@@ -602,7 +421,9 @@ for l = 1 : n_bin(4)
     end
 end
 
-% plotting the results
+%% Plot 2d frequencies %%
+
+% initialize the figure
 figure;
 hf2 = gcf;
 hf2.Position = [0, 0, 1000, 2000]; % Position and size
@@ -887,7 +708,9 @@ hold off
 title(tt2, 'Bivariate frequency of morphological properties',...
     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
-% parametrical colorcoded scatter plots
+%% Draw 3d (colorcoded) scatter plots %%
+
+% initialize the figure
 figure;
 hf3 = gcf;
 hf3.Position = [0, 0, 700, 2100]; % Position and size
@@ -1037,15 +860,20 @@ legend(legtxt3, 'Location', 'eastoutside', 'FontName', 'SansSerif',...
 
 %% Store outputs %%
 
-fn = struct('1d', fn1, '2d', fn2, 'labels', fn0, 'bins', {da_bin,...
-    ca_bin, od_bin, os_bin, x4}); % generate the output frequency structure
+% update the frequency structure
+fn.onedim = fn1;
+fn.twodim = fn2;
+fn.labels = fn0;
+fn.bins = {da_bin, ca_bin, od_bin, os_bin, x4};
 
-% delete the results figure handles if not requested as outputs;...
-    % ...otherwise, compile them in a structure for output
-if nargout < 4
+% update the plot structure if figures are requested as output,...
+    % ...otherwise delete
+if nargout < 2
     clear hf1 hf2 hf3
 else
-    hf = struct('1d', hf1, '2d', hf2, '3d', hf3);
+    hf.onedim = hf1;
+    hf.twodim = hf2;
+    hf.threedim = hf3;
 end
 
 end
