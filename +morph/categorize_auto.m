@@ -312,7 +312,7 @@ nexttile(5, [1,2]);
 
 fn11 = zeros(n_bin(1),1); % initialize dn/dlog(da)
 err5 = zeros(n_bin(1),1); % initialize the errors
-cm15 = colormap(turbo);
+cm15 = colormap(spring);
 iii = round(1 + (length(cm15) - 1) .* (0.1 : 0.8 / (n_bin(1) - 1) : 0.9)');
 cm15 = cm15(iii,:);
 for i = 1 : n_bin(1)
@@ -597,7 +597,9 @@ hold off
 tt2_5 = nexttile(23, [2,2]);
 
 isc5 = imagesc(ca_c, os_c, 100 * (fn2{6})');
-colormap(tt2_5, spring)
+cm25 = colormap(tt2_5, pink);
+cm25 = flip(cm25,1);
+colormap(tt2_5, cm25)
 % isc5.Interpolation = 'bilinear';
 
 box on
@@ -679,7 +681,7 @@ x7 = reordercats(x7,{'Fractal soot', 'Compact soot',...
     'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
 pc7 = pcolor((1 : 7), da_bin, 100 * [fn2{4}, zeros(n_bin(1), 1);...
     zeros(1, 7)]);
-colormap(tt2_7, summer)
+colormap(tt2_7, spring)
 % pc7.FaceColor = 'interp';
 % pc7.EdgeColor = 'none';
 
@@ -845,7 +847,7 @@ title(tt2, 'Bivariate frequencies of morphological properties',...
 % initialize the figure
 figure;
 hf3 = gcf;
-hf3.Position = [0, 0, 700, 2100]; % Position and size
+hf3.Position = [0, 0, 1500, 900]; % Position and size
 set(hf3, 'color', 'white'); % Background color
 
 % set the figure layout
@@ -853,142 +855,153 @@ tt3 = tiledlayout(2,3);
 tt3.TileSpacing = 'loose';
 tt3.Padding = 'loose';
 
-% size vs circularity
-cm31 = colormap(hot);
-m4 = round(1 + (length(cm31) - 1) .* (0.1 : 0.8 / 5 : 0.9)');
-cm31 = cm31(m4,:);
-m5 = cell(5,1);
+% set the colormap
+cm3 = colormap(turbo);
+m4 = round(1 + (length(cm3) - 1) .* (0.1 : 0.8 / 5 : 0.9)');
+cm3 = flip(cm3(m4,:), 1);
+m5 = cell(6,1);
 
+% size vs circularity
 nexttile
+
 for m = 1 : 6
-    m5{i} = (fn0(:,5) == 5);
-    scatter(da(m5{i}), ca(m5{i}), 10, cm31(m,:))
+    m5{m} = (fn0(:,5) == m);
+    scatter(da(m5{m}), ca(m5{m}), 15, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
-xlim(del_da)
-ylim(del_ca)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
+xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
+ylim(del_ca)
 ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 % size vs optical depth
-cm32 = colormap(gray);
-cm32 = cm32(m4,:);
-
 nexttile
+
 for m = 1 : 6
-    scatter(da(m5{i}), od(m5{i}), 10, cm32(m,:))
+    scatter(da(m5{m}), od(m5{m}), 15, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
-xlim(del_da)
-ylim(del_od)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
+xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
+ylim(del_od)
 ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 % size vs sharpness
-cm33 = colormap(parula);
-cm33 = cm33(m4,:);
-
 nexttile
+
 for m = 1 : 6
-    scatter(da(m5{i}), os(m5{i}), 10, cm33(m,:))
+    scatter(da(m5{m}), os(m5{m}), 15, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
-xlim(del_da)
-ylim(del_os)
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
+xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 % circularity vs optical depth
-cm34 = colormap(copper);
-cm34 = cm34(m4,:);
-
 nexttile
+
 for m = 1 : 6
-    scatter(ca(m5{i}), od(m5{i}), 10, cm34(m,:))
+    scatter(ca(m5{m}), od(m5{m}), 15, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 xlim(del_ca)
-ylim(del_od)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
 xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+ylim(del_od)
 ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 % circularity vs optical sharpness
-cm35 = colormap(copper);
-cm35 = cm35(m4,:);
-
 nexttile
+
 for m = 1 : 6
-    scatter(ca(m5{i}), os(m5{i}), 10, cm35(m,:))
+    scatter(ca(m5{m}), os(m5{m}), 10, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 xlim(del_ca)
-ylim(del_os)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
 xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 % optical depth vs optical sharpness
-cm36 = colormap(copper);
-cm36 = cm36(m4,:);
-
 nexttile
+
 for m = 1 : 6
-    scatter(od(m5{i}), os(m5{i}), 10, cm36(m,:))
+    scatter(od(m5{m}), os(m5{m}), 10, cm3(m,:))
     hold on
 end
 
 box on
 axis padded
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
 xlim(del_od)
-ylim(del_os)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11)
 xlabel('Optial depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 hold off
 
 legtxt3 = {'Fractal soot', 'Compact soot', 'Tarball', 'Softball',...
     'Hybrid', 'Miscellaneous'};
-legend(legtxt3, 'Location', 'eastoutside', 'FontName', 'SansSerif',...
-    'FontSize', 12);
+leg3 = legend(legtxt3, 'FontName', 'SansSerif', 'FontSize', 11);
+leg3.Layout.Tile = 'east';
+leg3.Title.String = 'Morphological type';
+leg3.Title.FontName = 'SansSerif';
+leg3.Title.FontSize = 12;
+leg3.Title.FontWeight = 'bold';
+
+title(tt3, 'Trivariate dispersions of morphological properties',...
+    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
 %% Store outputs %%
 
