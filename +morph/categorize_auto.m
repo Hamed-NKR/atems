@@ -440,7 +440,7 @@ tt2.Padding = 'loose';
 % size distribution vs circularity subplot
 tt2_1 = nexttile(1, [2,2]);
 
-pc1 = pcolor(da_bin, ca_bin, [(fn2{1})', zeros(n_bin(2), 1);...
+pc1 = pcolor(da_bin, ca_bin, 100 * [(fn2{1})', zeros(n_bin(2), 1);...
     zeros(1, n_bin(1) + 1)]);
 cm21 = colormap(tt2_1, hot);
 cm21 = flip(cm21,1);
@@ -450,27 +450,37 @@ colormap(tt2_1, cm21)
 
 box on
 axis padded
-set(gca, 'XScale', 'log')
-xlim(del_da)
-ylim(del_ca)
-yticks(ca_bin)
-ytickformat('%.2f')
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out')
+set(gca, 'XScale', 'log')
+xlim(del_da)
 xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
+yticks(ca_bin)
+ytickformat('%.2f')
+ylim(del_ca)
 ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb1 = colorbar;
 cb1.FontName = 'SansSerif';
 cb1.FontSize = 10;
 cb1.TickLength = 0.03;
+cb1.Label.String = 'Frequency (%)';
+cb1.Label.FontName = 'SansSerif';
+cb1.Label.FontSize = 10;
+cb1.Label.FontWeight = 'bold';
+cb1.Label.Rotation = 270;
+cb1_pos = get(cb1, 'Position');
+cb1.Label.Position = [cb1_pos(1) + 3.5, cb1_pos(2) + 11]; % adjust...
+    % ...colorbar label position
+
 hold off
 
 % size distribution vs optical depth subplot
 tt2_2 = nexttile(21, [2,2]);
 
-pc2 = pcolor(da_bin, od_bin, [(fn2{2})', zeros(n_bin(3), 1);...
+pc2 = pcolor(da_bin, od_bin, 100 * [(fn2{2})', zeros(n_bin(3), 1);...
     zeros(1, n_bin(1) + 1)]);
 cm22 = colormap(tt2_2, gray);
 cm22 = flip(cm22,1);
@@ -480,27 +490,36 @@ colormap(tt2_2, cm22)
 
 box on
 axis padded
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
 xlim(del_da)
+xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
+    'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
 ylim(del_od)
 yticks(od_bin)
 ytickformat('%.2f')
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
-    'TickLength', [0.02 0.02], 'TickDir', 'out')
-xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
-    'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
 ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb2 = colorbar;
 cb2.FontName = 'SansSerif';
 cb2.FontSize = 10;
 cb2.TickLength = 0.03;
+cb2.Label.String = 'Frequency (%)';
+cb2.Label.FontName = 'SansSerif';
+cb2.Label.FontSize = 10;
+cb2.Label.FontWeight = 'bold';
+cb2.Label.Rotation = 270;
+cb2_pos = get(cb2, 'Position');
+cb2.Label.Position = [cb2_pos(1) + 3.5, cb2_pos(2) + 5.4];
+
 hold off
 
 % size distribution vs sharpness subplot
 tt2_3 = nexttile(41, [2,2]);
 
-pc3 = pcolor(da_bin, os_bin, [(fn2{3})', zeros(n_bin(4), 1);...
+pc3 = pcolor(da_bin, os_bin, 100 * [(fn2{3})', zeros(n_bin(4), 1);...
     zeros(1, n_bin(1) + 1)]);
 colormap(tt2_3, parula)
 % pc3.FaceColor = 'interp';
@@ -508,27 +527,36 @@ colormap(tt2_3, parula)
 
 box on
 axis padded
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
 xlim(del_da)
+xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
+    'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
 ylim(del_os)
 yticks(os_bin)
 ytickformat('%.2f')
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
-    'TickLength', [0.02 0.02], 'TickDir', 'out')
-xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
-    'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb3 = colorbar;
 cb3.FontName = 'SansSerif';
 cb3.FontSize = 10;
 cb3.TickLength = 0.03;
+cb3.Label.String = 'Frequency (%)';
+cb3.Label.FontName = 'SansSerif';
+cb3.Label.FontSize = 10;
+cb3.Label.FontWeight = 'bold';
+cb3.Label.Rotation = 270;
+cb3_pos = get(cb3, 'Position');
+cb3.Label.Position = [cb3_pos(1) + 3.5, cb3_pos(2) + 2.8];
+
 hold off
 
 % circularity vs optical depth subplot
 tt2_4 = nexttile(3, [2,2]);
 
-isc4 = imagesc(ca_c, od_c, (fn2{5})');
+isc4 = imagesc(ca_c, od_c, 100 * (fn2{5})');
 cm24 = colormap(tt2_4, copper);
 cm24 = flip(cm24,1);
 colormap(tt2_4, cm24)
@@ -536,59 +564,77 @@ colormap(tt2_4, cm24)
 
 box on
 axis padded
-xlim(del_ca)
-ylim(del_od)
-xticks(ca_bin)
-xtickformat('%.2f')
-yticks(od_bin)
-ytickformat('%.2f')
 grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1, 'YDir', 'normal')
+xlim(del_ca)
+xticks(ca_bin)
+xtickformat('%.2f')
 xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+ylim(del_od)
+yticks(od_bin)
+ytickformat('%.2f')
 ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb4 = colorbar;
 cb4.FontName = 'SansSerif';
 cb4.FontSize = 10;
 cb4.TickLength = 0.03;
+cb4.Label.String = 'Frequency (%)';
+cb4.Label.FontName = 'SansSerif';
+cb4.Label.FontSize = 10;
+cb4.Label.FontWeight = 'bold';
+cb4.Label.Rotation = 270;
+cb4_pos = get(cb4, 'Position');
+cb4.Label.Position = [cb4_pos(1) + 3.5, cb4_pos(2) + 5.2];
+
 hold off
 
 % circularity vs sharpness subplot
 tt2_5 = nexttile(23, [2,2]);
 
-isc5 = imagesc(ca_c, os_c, (fn2{6})');
+isc5 = imagesc(ca_c, os_c, 100 * (fn2{6})');
 colormap(tt2_5, spring)
 % isc5.Interpolation = 'bilinear';
 
 box on
 axis padded
-xlim(del_ca)
-ylim(del_os)
-xticks(ca_bin)
-xtickformat('%.2f')
-yticks(os_bin)
-ytickformat('%.2f')
 grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1, 'YDir', 'normal')
+xticks(ca_bin)
+xtickformat('%.2f')
+xlim(del_ca)
 xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+yticks(os_bin)
+ytickformat('%.2f')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb5 = colorbar;
 cb5.FontName = 'SansSerif';
 cb5.FontSize = 10;
 cb5.TickLength = 0.03;
+cb5.Label.String = 'Frequency (%)';
+cb5.Label.FontName = 'SansSerif';
+cb5.Label.FontSize = 10;
+cb5.Label.FontWeight = 'bold';
+cb5.Label.Rotation = 270;
+cb5_pos = get(cb5, 'Position');
+cb5.Label.Position = [cb5_pos(1) + 3.5, cb5_pos(2) + 3.3];
+
 hold off
 
 % optical depth vs sharpness subplot
 tt2_6 = nexttile(43, [2,2]);
 
-isc6 = imagesc(od_c, os_c, (fn2{8})');
+isc6 = imagesc(od_c, os_c, 100 * (fn2{8})');
 cm26 = colormap(tt2_6, bone);
 cm26 = flip(cm26,1);
 colormap(tt2_6, cm26)
@@ -596,24 +642,32 @@ colormap(tt2_6, cm26)
 
 box on
 axis padded
-xlim(del_od)
-ylim(del_os)
+grid on
 xticks(od_bin)
 xtickformat('%.2f')
+xlim(del_od)
+xlabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+    'FontWeight', 'bold')
 yticks(os_bin)
 ytickformat('%.2f')
-grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1, 'YDir', 'normal')
-xlabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 cb6 = colorbar;
 cb6.FontName = 'SansSerif';
 cb6.FontSize = 10;
 cb6.TickLength = 0.03;
+cb6.Label.String = 'Frequency (%)';
+cb6.Label.FontName = 'SansSerif';
+cb6.Label.FontSize = 10;
+cb6.Label.FontWeight = 'bold';
+cb6.Label.Rotation = 270;
+cb6_pos = get(cb6, 'Position');
+cb6.Label.Position = [cb6_pos(1) + 3.5, cb6_pos(2) + 2];
+
 hold off
 
 % size distribution vs morphlogical type
@@ -623,7 +677,7 @@ x7 = categorical({'Fractal soot', 'Compact soot',...
     'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
 x7 = reordercats(x7,{'Fractal soot', 'Compact soot',...
     'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
-pc7 = pcolor((1 : 7), da_bin, [fn2{4}, zeros(n_bin(1), 1);...
+pc7 = pcolor((1 : 7), da_bin, 100 * [fn2{4}, zeros(n_bin(1), 1);...
     zeros(1, 7)]);
 colormap(tt2_7, summer)
 % pc7.FaceColor = 'interp';
@@ -631,31 +685,39 @@ colormap(tt2_7, summer)
 
 box on
 axis padded
-set(gca, 'YScale', 'log')
+set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
+    'GridAlpha', 1)
 xticks(1.5 : 1 : 6.5)
 xticklabels(x7)
 xtickangle(45)
 xlim([1,7])
+xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
+    'FontWeight', 'bold')
+set(gca, 'YScale', 'log')
 % yticks(da_bin)
 % ytickformat('%.2f')
 ylim(del_da)
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
-    'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
-    'GridAlpha', 1)
-xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
 ylabel('Projected area-equivalent diameter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
 cb7 = colorbar;
 cb7.FontName = 'SansSerif';
 cb7.FontSize = 10;
 cb7.TickLength = 0.015;
+cb7.Label.String = 'Frequency (%)';
+cb7.Label.FontName = 'SansSerif';
+cb7.Label.FontSize = 10;
+cb7.Label.FontWeight = 'bold';
+cb7.Label.Rotation = 270;
+cb7_pos = get(cb7, 'Position');
+cb7.Label.Position = [cb7_pos(1) + 3.5, cb7_pos(2) + 3.6];
+
 hold off
 
 % circularity vs morphlogical type
 tt2_8 = nexttile(35, [3,3]);
 
-isc8 = pcolor((1 : 7), ca_bin, [fn2{7}, zeros(n_bin(2), 1);...
+isc8 = pcolor((1 : 7), ca_bin, 100 * [fn2{7}, zeros(n_bin(2), 1);...
     zeros(1, 7)]);
 cm28 = colormap(tt2_8, autumn);
 cm28 = flip(cm28,1);
@@ -664,89 +726,115 @@ colormap(tt2_8, cm28)
 
 box on
 axis padded
-xticks(1.5 : 6.5)
-xticklabels(x7)
-xtickangle(45)
-xlim([1, 7])
-yticks(ca_bin)
-ytickformat('%.2f')
-ylim(del_ca)
 grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
+xticks(1.5 : 6.5)
+xticklabels(x7)
+xtickangle(45)
+xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+yticks(ca_bin)
+ytickformat('%.2f')
+ylim(del_ca)
 ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+
 cb8 = colorbar;
 cb8.FontName = 'SansSerif';
 cb8.FontSize = 10;
 cb8.TickLength = 0.015;
+cb8.Label.String = 'Frequency (%)';
+cb8.Label.FontName = 'SansSerif';
+cb8.Label.FontSize = 10;
+cb8.Label.FontWeight = 'bold';
+cb8.Label.Rotation = 270;
+cb8_pos = get(cb8, 'Position');
+cb8.Label.Position = [cb8_pos(1) + 3.5, cb8_pos(2) + 4.9];
+
 hold off
 
 % optical depth vs morphlogical type
 tt2_9 = nexttile(8, [3,3]);
 
-isc9 = pcolor((1 : 7), od_bin, [fn2{9}, zeros(n_bin(3), 1);...
+isc9 = pcolor((1 : 7), od_bin, 100 * [fn2{9}, zeros(n_bin(3), 1);...
     zeros(1, 7)]);
 cm29 = colormap(tt2_9, gray);
 cm29 = flip(cm29,1);
-colormap(tt2_8, cm29)
+colormap(tt2_9, cm29)
 % isc9.Interpolation = 'bilinear';
 
 box on
 axis padded
-xticks(1.5 : 6.5)
-xticklabels(x7)
-xtickangle(45)
-xlim([1, 7])
-yticks(od_bin)
-ytickformat('%.2f')
-ylim(del_od)
 grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
+xticks(1.5 : 6.5)
+xticklabels(x7)
+xtickangle(45)
+xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+yticks(od_bin)
+ytickformat('%.2f')
+ylim(del_od)
 ylabel('Optical depth (-)', 'FontName', 'SansSerif',...
     'FontSize', 12, 'FontWeight', 'bold')
 cb9 = colorbar;
 cb9.FontName = 'SansSerif';
 cb9.FontSize = 10;
 cb9.TickLength = 0.015;
+cb9.Label.String = 'Frequency (%)';
+cb9.Label.FontName = 'SansSerif';
+cb9.Label.FontSize = 10;
+cb9.Label.FontWeight = 'bold';
+cb9.Label.Rotation = 270;
+cb9_pos = get(cb9, 'Position');
+cb9.Label.Position = [cb9_pos(1) + 3.5, cb9_pos(2) + 3.6];
+
 hold off
 
 % optical sharpness vs morphlogical type
 tt2_10 = nexttile(38, [3,3]);
 
-isc10 = pcolor((1 : 7), os_bin, [fn2{10}, zeros(n_bin(4), 1);...
+isc10 = pcolor((1 : 7), os_bin, 100 * [fn2{10}, zeros(n_bin(4), 1);...
     zeros(1, 7)]);
 colormap(tt2_10, winter)
 % isc10.Interpolation = 'bilinear';
 
 box on
 axis padded
-xticks(1.5 : 6.5)
-xticklabels(x7)
-xtickangle(45)
-xlim([1, 7])
-yticks(os_bin)
-ytickformat('%.2f')
-ylim(del_os)
 grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
+xticks(1.5 : 6.5)
+xticklabels(x7)
+xtickangle(45)
+xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
+yticks(os_bin)
+ytickformat('%.2f')
+ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif',...
     'FontSize', 12, 'FontWeight', 'bold')
+
 cb10 = colorbar;
 cb10.FontName = 'SansSerif';
 cb10.FontSize = 10;
 cb10.TickLength = 0.015;
+cb10.Label.String = 'Frequency (%)';
+cb10.Label.FontName = 'SansSerif';
+cb10.Label.FontSize = 10;
+cb10.Label.FontWeight = 'bold';
+cb10.Label.Rotation = 270;
+cb10_pos = get(cb10, 'Position');
+cb10.Label.Position = [cb10_pos(1) + 3.5, cb10_pos(2) + 2.4];
+
 hold off
 
 title(tt2, 'Bivariate frequencies of morphological properties',...
