@@ -149,7 +149,6 @@ for ii=1:length(imgs_binary) % loop through provided images
     seg_backgr(CC_PixelIdxList) = []; % segmented background grayscale image
     I_backgr = mean(seg_backgr); % background image intensity
     
-    
     % If more than 50 aggregates were found, the method likely failed. 
     % Skip this image and continue on. 
     if naggs>50; continue; end
@@ -186,13 +185,14 @@ for ii=1:length(imgs_binary) % loop through provided images
         % Get a cropped version of the aggregate
         % 'autocrop' method included below.
         [~, ~, Aggs0(jj).rect] = autocrop(img, img_binary);
-            
         
         
         %== Compute aggregate dimensions/parameters ======================%
         SE = strel('disk', 1);
         img_dilated = imdilate(img_binary,SE);
-        img_edge = img_dilated - img_binary;
+        img_edge_in = img_dilated - img_binary;
+        img_eroded = imerode(img_binary,SE);
+        img_edge_out = img_eroded - img_binary;
         
         [row, col] = find(imcrop(Aggs0(jj).binary, Aggs0(jj).rect));
         Aggs0(jj).length = max((max(row)-min(row)), (max(col)-min(col))) * pixsize(ii);
@@ -206,22 +206,25 @@ for ii=1:length(imgs_binary) % loop through provided images
             pixsize(ii) ^ 2; % aggregate area [nm^2]
         Aggs0(jj).Rg = gyration(img_binary, pixsize(ii)); % calculate radius of gyration [nm]
         
-        Aggs0(jj).perimeter = sum(sum(img_edge~=0)) * ...
-            pixsize(ii); % calculate aggregate perimeter
+        Aggs0(jj).perimeter = pixsize(ii) * (sum(sum(img_edge_in~=0)) +...
+            sum(sum(img_edge_out~=0))) / 2; % calculate aggregate perimeter
         
         [x,y] = find(img_binary ~= 0);
         Aggs0(jj).center_mass = [mean(x); mean(y)];
         
         p_c = 2 * sqrt(pi * Aggs0(jj).area); % perimeter of aggregate area-equivalent circle
-        Aggs0(jj).ca = p_c / Aggs0(jj).perimeter; % Aggregate circulirity (the degree of being close to a circle (=1))
+        Aggs0(jj).ca = p_c / Aggs0(jj).perimeter; % aggregate area-equiv. circulirity
+            % the degree of being close to a circle (1: circle, 0: straight line)
         
-        agg_grayscale = img(CC.PixelIdxList{1,jj}); % A vector containing the selected aggregate's grascale pixel values
-        % aggregate optical depth metric (1: black, 0: white)
+        agg_grayscale = img(CC.PixelIdxList{1,jj}); % the selected agg's grayscale pixel values
         if isa(img, 'uint16')
             Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^16 - 1);
+                % agg's optical depth metric (1: black, 0: white)
         else
             Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^8 - 1);
         end
+        
+        
         
         if f_plot==1; set(groot,'CurrentFigure',f0); tools.imshow_agg(Aggs0, ii, 0); title(num2str(ii)); drawnow; end
     end

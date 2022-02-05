@@ -112,17 +112,17 @@ for i = 1 : n_imgs
         morph_check = 0; % initialize the checking variable for...
             % ...the user's inputs
         
-        while ~all(morph_check) % check if acceptable inputs are provided
+        while ~morph_check % check if acceptable inputs are provided
             
             if opts_ui_bin
                 % request inputs on circulariry and optical depth from the user
-                prompt = {['\fontsize{12}Please enter the',...
-                    '\fontsize{12}\bfMorphological Type:', newline,...
-                    '\fontsize{12}\rm\it(FS/Fs/fs: Fractal soot, Compact soot,',...
-                    '\fontsize{12}\rm\it TB/Tb/tb: Tarball, SB/Sb/sb: Softball, H/h: Hybrid, M/m: Miscellaneous)']};
-                dlgtitle = 'User''s morphological inputs';
-                dims = [1 100];
-                defaultans = {'', '', '', ''};
+                prompt = {['\fontsize{11}Please enter the',...
+                    '\fontsize{11}\bf Morphological Type:', newline,...
+                    '\fontsize{10}\rm\it(FS/Fs/fs: Fractal soot, Compact soot, TB/Tb/tb: Tarball,',...
+                    '\fontsize{10}\rm\it SB/Sb/sb: Softball, H/h: Hybrid, M/m: Miscellaneous)']};
+                dlgtitle = 'User''s morphological input';
+                dims = [1 150];
+                defaultans = {''};
                 dlgopts.Interpreter = 'tex';
                 morph = inputdlg(prompt, dlgtitle, dims, defaultans, dlgopts);
                 
@@ -130,8 +130,11 @@ for i = 1 : n_imgs
                 morph = morphstr{randsample(6,1)};
             end
             
-            % feed the inputs to the aggregate properties cell array
-            switch morph % morph. type
+            morph_check = 1; % initially assume morph. type input is valid
+            
+            % record the input (morph. type) in the aggregate properties
+                % ...datasheet
+            switch morph{1}
                 case {'FS', 'Fs', 'fs'}
                     Aggs(jj).Type = 'Fractal soot';
                 case {'CS', 'Cs', 'cs'}
@@ -148,25 +151,27 @@ for i = 1 : n_imgs
                     % issue warning
                     warn = questdlg(['Invalid input for morph. type!',...
                         newline, '(please see the descriptions in the prompt input window)'],...
-                        'warning', 'Continue', 'Cancel', 'Continue');
+                        'warning', 'repeat', 'skip', 'repeat');
+                    
                     % handle response
                     switch warn
-                        case 'continue'
-                            continue
-                        case 'cancel'
+                        case 'repeat'
+                            morph_check = 0; % take the input again
+                            
+                        case 'skip'
                             warning(['Invalid input for morph. type!', newline,...
                                 '(please see the descriptions in the prompt input window)'])
-                            return
+                            Aggs(jj).Type = 'NA';
+                            continue
                     end
-            end
-            morph_check = 1; % morph. type input is valid
-            
-            if opts_ui_bin
-                % clear the highlighted plot to prepare for next aggregate
-                ha0 = gca;
-                cla(ha0)
-            end
+            end           
         end
+        
+        if opts_ui_bin
+            % clear the highlighted plot to prepare for next aggregate
+            ha0 = gca;
+            cla(ha0)
+        end         
     end
     
     if opts_ui_bin
@@ -178,4 +183,5 @@ if opts_ui_bin
     close(hf0) % close figure
     clear hf0 % clear figure handle
 end
+
 end
