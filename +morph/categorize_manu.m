@@ -69,7 +69,7 @@ if ismember(opts_ui, {'ON', 'On', 'on'})
     
 elseif ismember(opts_ui, {'OFF', 'Off', 'off'})
     opts_ui_bin = 0;
-    morphstr = {'fs', 'cs', 'tb', 'sb', 'h', 'm'};
+    morphstr = {'s', 'tb', 'a', 'sb', 'h', 'm'};
     
 else
     error(['Invalid user interface option input!', newline,...
@@ -118,8 +118,9 @@ for i = 1 : n_imgs
                 % request inputs on circulariry and optical depth from the user
                 prompt = {['\fontsize{11}Please enter the',...
                     '\fontsize{11}\bf Morphological Type:', newline,...
-                    '\fontsize{10}\rm\it(FS/Fs/fs: Fractal soot, Compact soot, TB/Tb/tb: Tarball,',...
-                    '\fontsize{10}\rm\it SB/Sb/sb: Softball, H/h: Hybrid, M/m: Miscellaneous)']};
+                    '\fontsize{10}\rm\it(S/s: Soot, TB/Tb/tb: Tarball,',...
+                    '\fontsize{10}\rm\it A/a: Ash, SB/Sb/sb: Softball,',...
+                    '\fontsize{10}\rm\it H/h: Hybrid, M/m: Miscellaneous)']};
                 dlgtitle = 'User''s morphological input';
                 dims = [1 150];
                 defaultans = {''};
@@ -127,7 +128,7 @@ for i = 1 : n_imgs
                 morph = inputdlg(prompt, dlgtitle, dims, defaultans, dlgopts);
                 
             else
-                morph = morphstr{randsample(6,1)};
+                morph = morphstr(randsample(6,1));
             end
             
             morph_check = 1; % initially assume morph. type input is valid
@@ -135,12 +136,12 @@ for i = 1 : n_imgs
             % record the input (morph. type) in the aggregate properties
                 % ...datasheet
             switch morph{1}
-                case {'FS', 'Fs', 'fs'}
-                    Aggs(jj).Type = 'Fractal soot';
-                case {'CS', 'Cs', 'cs'}
-                    Aggs(jj).Type = 'Compact soot';
+                case {'S', 's'}
+                    Aggs(jj).Type = 'Soot';
                 case {'TB', 'Tb', 'tb'}
                     Aggs(jj).Type = 'Tarball';
+                case {'A', 'a'}
+                    Aggs(jj).Type = 'Ash';
                 case {'SB', 'Sb', 'sb'}
                     Aggs(jj).Type = 'Softball';
                 case {'H', 'h'}

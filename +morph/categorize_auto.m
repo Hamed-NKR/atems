@@ -27,11 +27,11 @@ os = rand(n_agg_tot0,1); % optical sharpness
 
 % reload the morphological types
 for ind = 1 : n_agg_tot0
-    if strcmp(Aggs(ind).Type, 'Fractal soot')
+    if strcmp(Aggs(ind).Type, 'Soot')
         fn0(ind,5) = 1;
-    elseif strcmp(Aggs(ind).Type, 'Compact soot')
-        fn0(ind,5) = 2;
     elseif strcmp(Aggs(ind).Type, 'Tarball')
+        fn0(ind,5) = 2;
+    elseif strcmp(Aggs(ind).Type, 'Ash')
         fn0(ind,5) = 3;
     elseif strcmp(Aggs(ind).Type, 'Softball')
         fn0(ind,5) = 4;
@@ -54,25 +54,6 @@ elseif length(n_bin(:)) ~= 4
         'Should be a 4 member vector'])
 end
 
-% range of properties
-del_da = [min(da), max(da)];
-del_ca = [min(ca), max(ca)];
-del_od = [min(od), max(od)];
-del_os = [min(os), max(os)];
-
-% discretize the domains of post-processing variables (binning)
-da_bin = del_da(1) + (del_da(2) - del_da(1)) .*...
-    log(1 : (exp(1) - 1) / n_bin(1) : exp(1));
-ca_bin = del_ca(1) + (del_ca(2) - del_ca(1)) .* (0 : 1 / n_bin(2) : 1);
-od_bin = del_od(1) + (del_od(2) - del_od(1)) .* (0 : 1 / n_bin(3) : 1);
-os_bin = del_os(1) + (del_os(2) - del_os(1)) .* (0 : 1 / n_bin(4) : 1);
-
-% initialize the bin centers
-da_c = zeros(n_bin(1),1);
-ca_c = zeros(n_bin(2),1);
-od_c = zeros(n_bin(3),1);
-os_c = zeros(n_bin(4),1);
-
 % Removing diverged/ data
 ii0 = da > 1e4;
 jj0 = (ca > 2) | (ca < -1);
@@ -85,6 +66,30 @@ ca(rmv) = [];
 od(rmv) = [];
 os(rmv) = [];
 fn0(rmv,:) = [];
+
+% range of properties
+del_da = [min(da), max(da)];
+del_ca = [min(ca), max(ca)];
+del_od = [min(od), max(od)];
+del_os = [min(os), max(os)];
+
+% discretize the domains of post-processing variables (binning)
+r_da = (del_da(2) / del_da(1))^(1 / n_bin(1));
+da_bin = del_da(1) * ones(1, n_bin(1) + 1);
+for i = 1 : n_bin(1)
+    da_bin(i+1) = da_bin(i+1) * r_da^(i);
+end
+% da_bin = del_da(1) + (del_da(2) - del_da(1)) .*...
+%     log(1 : (exp(1) - 1) / n_bin(1) : exp(1));
+ca_bin = del_ca(1) + (del_ca(2) - del_ca(1)) .* (0 : 1 / n_bin(2) : 1);
+od_bin = del_od(1) + (del_od(2) - del_od(1)) .* (0 : 1 / n_bin(3) : 1);
+os_bin = del_os(1) + (del_os(2) - del_os(1)) .* (0 : 1 / n_bin(4) : 1);
+
+% initialize the bin centers
+da_c = zeros(n_bin(1),1);
+ca_c = zeros(n_bin(2),1);
+od_c = zeros(n_bin(3),1);
+os_c = zeros(n_bin(4),1);
 
 n_agg_tot = length(da); % nubmer of aggregates after removing the...
     % ...diverged data
@@ -102,6 +107,13 @@ fn2 = {zeros(n_bin(1), n_bin(2)), zeros(n_bin(1), n_bin(3)),...
 
 %% assign to 1d bins %%
 
+% initialize optical depth colorcoding arrays
+od_da = zeros(n_bin(1),2);
+od_ca = zeros(n_bin(2),2);
+od_os = zeros(n_bin(4),2);
+od_mt = zeros(6,2);
+
+% size binning
 for i = 1 : n_bin(1)
     if i == 1 % The first bin (only upper limit)
         ii = da < da_bin(i+1);
@@ -112,9 +124,14 @@ for i = 1 : n_bin(1)
     end
 
     da_c(i) = sqrt(da_bin(i) * da_bin(i+1));
+    od_da(i,1) = sum(od(ii)) / length(ii); % take average of optical...
+        % ...depth in each bin
     fn0(ii,1) = i; % column 1 to be size bin labels
     fn1{1}(i) = nnz(ii) / n_agg_tot; % binned size freqs. (%)
 end
+
+[~, od_da(:,2)] = sort(od_da(:,1)); % sort based on average optical...
+    % ...depth for certain size bins
 
 % circularity binning
 for j = 1 : n_bin(2)
@@ -127,9 +144,12 @@ for j = 1 : n_bin(2)
     end
     
     ca_c(j) = (ca_bin(j) + ca_bin(j+1)) / 2;
+    od_ca(j,1) = sum(od(jj)) / length(jj);
     fn0(jj,2) = j; % column 2 to be circularity bin labels    
     fn1{2}(j) = nnz(jj) / n_agg_tot; % circularity freqs. (%)
 end
+
+[~, od_ca(:,2)] = sort(od_ca(:,1));
 
 % optical depth binning
 for k = 1 : n_bin(3)
@@ -157,14 +177,21 @@ for l = 1 : n_bin(4)
     end
     
     os_c(l) = (os_bin(l) + os_bin(l+1)) / 2;
+    od_os(l,1) = sum(od(ll)) / length(ll);
     fn0(ll,4) = l; % column 4 to be optical sharpness bin labels
     fn1{4}(l) = nnz(ll) / n_agg_tot; % optical sharpness freqs. (%)
 end
 
+[~, od_os(:,2)] = sort(od_os(:,1));
+
 % morphological type binning
 for m = 1 : 6
-    fn1{5}(m) = nnz(fn0(:,5) == m) / n_agg_tot;
+    mm = fn0(:,5) == m;
+    fn1{5}(m) = nnz(mm) / n_agg_tot;
+    od_mt(m,1) = sum(od(mm)) / length(mm);
 end
+
+[~, od_mt(:,2)] = sort(od_mt(:,1));
 
 %% Plot univariate frequency barcharts %%
 
@@ -187,7 +214,7 @@ cm11 = colormap(autumn);
 jjj = round(1 + (length(cm11) - 1) .* (0.1 : 0.8 / (n_bin(2) - 1) : 0.9)');
 cm11 = cm11(jjj,:); % get the descretized colormap
 cm11 = flip(cm11,1);
-bc1.CData = cm11;
+bc1.CData = cm11(od_ca(:,2),:);
 hold on
 
 err1 = sqrt((fn1{2} / n_agg_tot) .* (1 + fn1{2}) / n_agg_tot);
@@ -249,7 +276,7 @@ bc3 = bar(os_c, 100 * fn1{4}, 'FaceColor', 'flat');
 cm13 = colormap(winter);
 lll = round(1 + (length(cm13) - 1) .* (0.1 : 0.8 / (n_bin(4) - 1) : 0.9)');
 cm13 = cm13(lll,:);
-bc3.CData = cm13;
+bc3.CData = cm13(od_os(:,2),:);
 hold on
 
 err3 = sqrt((fn1{4} / n_agg_tot) .* (1 + fn1{4}) / n_agg_tot);
@@ -274,16 +301,16 @@ hold off
 
 % morphological type subplot
 nexttile(4);
-x4 = categorical({'Fractal soot', 'Compact soot',...
-    'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
-x4 = reordercats(x4,{'Fractal soot', 'Compact soot',...
-    'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
+x4 = categorical({'Soot', 'Tarball', 'Ash', 'Softball', 'Hybrid',...
+    'Miscellaneous'});
+x4 = reordercats(x4,{'Soot', 'Tarball', 'Ash', 'Softball', 'Hybrid',...
+    'Miscellaneous'});
 bc4 = bar(x4, 100 * fn1{5}, 'FaceColor', 'flat');
 cm14 = colormap(summer);
 mmm = round(1 + (length(cm14) - 1) .* (0.1 : 0.8 / 5 : 0.9)');
 cm14 = cm14(mmm,:);
 cm14 = flip(cm14,1);
-bc4.CData = cm14;
+bc4.CData = cm14(od_mt(:,2),:);
 hold on
 
 err4 = sqrt((fn1{5} / n_agg_tot) .* (1 + fn1{5}) / n_agg_tot);
@@ -321,7 +348,7 @@ for i = 1 : n_bin(1)
         (log(da_bin(i+1) / da_bin(i) * n_agg_tot));
     
     rectangle('Position',[da_bin(i), 0, (da_bin(i+1) - da_bin(i)),...
-        fn11(i)], 'FaceColor', cm15(i,:));
+        fn11(i)], 'FaceColor', cm15(od_da(i,2),:));
     hold on
 end
 hold on
@@ -675,10 +702,6 @@ hold off
 % size distribution vs morphlogical type
 tt2_7 = nexttile(5, [3,3]);
 
-x7 = categorical({'Fractal soot', 'Compact soot',...
-    'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
-x7 = reordercats(x7,{'Fractal soot', 'Compact soot',...
-    'Tarball', 'Softball', 'Hybrid', 'Miscellaneous'});
 pc7 = pcolor((1 : 7), da_bin, 100 * [fn2{4}, zeros(n_bin(1), 1);...
     zeros(1, 7)]);
 colormap(tt2_7, spring)
@@ -691,7 +714,7 @@ set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
 xticks(1.5 : 1 : 6.5)
-xticklabels(x7)
+xticklabels(x4)
 xtickangle(45)
 xlim([1,7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -733,7 +756,7 @@ set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
 xticks(1.5 : 6.5)
-xticklabels(x7)
+xticklabels(x4)
 xtickangle(45)
 xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -775,7 +798,7 @@ set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
 xticks(1.5 : 6.5)
-xticklabels(x7)
+xticklabels(x4)
 xtickangle(45)
 xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -814,7 +837,7 @@ set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1)
 xticks(1.5 : 6.5)
-xticklabels(x7)
+xticklabels(x4)
 xtickangle(45)
 xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -856,9 +879,17 @@ tt3.TileSpacing = 'loose';
 tt3.Padding = 'loose';
 
 % set the colormap
-cm3 = colormap(turbo);
-m4 = round(1 + (length(cm3) - 1) .* (0.1 : 0.8 / 5 : 0.9)');
-cm3 = flip(cm3(m4,:), 1);
+% cm3 = colormap(turbo);
+% m4 = round(1 + (length(cm3) - 1) .* (0.1 : 0.8 / 5 : 0.9)');
+% cm3 = flip(cm3(m4,:), 1);
+cm3 = [0.8500 0.3250 0.0980;... % soot: red
+    0, 0, 0;... % % tarball: black
+    0.9290 0.6940 0.1250;... % ash: yellow
+    0.5 0.5 0.5;... % softball: grey
+    0 0.4470 0.7410;... % hybrid: blue
+    0.4660 0.6740 0.1880]; % misc.: green
+mt3 = {'*', 'o', '^', 'h', '+', 'x'};
+
 m5 = cell(6,1);
 
 % size vs circularity
@@ -866,7 +897,7 @@ nexttile
 
 for m = 1 : 6
     m5{m} = (fn0(:,5) == m);
-    scatter(da(m5{m}), ca(m5{m}), 15, cm3(m,:))
+    scatter(da(m5{m}), ca(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -875,6 +906,7 @@ axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
+xtickangle(45)
 xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
@@ -888,7 +920,7 @@ hold off
 nexttile
 
 for m = 1 : 6
-    scatter(da(m5{m}), od(m5{m}), 15, cm3(m,:))
+    scatter(da(m5{m}), od(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -897,6 +929,7 @@ axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
+xtickangle(45)
 xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
@@ -910,7 +943,7 @@ hold off
 nexttile
 
 for m = 1 : 6
-    scatter(da(m5{m}), os(m5{m}), 15, cm3(m,:))
+    scatter(da(m5{m}), os(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -919,6 +952,7 @@ axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
 set(gca, 'XScale', 'log')
+xtickangle(45)
 xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
@@ -932,7 +966,7 @@ hold off
 nexttile
 
 for m = 1 : 6
-    scatter(ca(m5{m}), od(m5{m}), 15, cm3(m,:))
+    scatter(ca(m5{m}), od(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -953,7 +987,7 @@ hold off
 nexttile
 
 for m = 1 : 6
-    scatter(ca(m5{m}), os(m5{m}), 10, cm3(m,:))
+    scatter(ca(m5{m}), os(m5{m}), 10, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -974,7 +1008,7 @@ hold off
 nexttile
 
 for m = 1 : 6
-    scatter(od(m5{m}), os(m5{m}), 10, cm3(m,:))
+    scatter(od(m5{m}), os(m5{m}), 10, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -991,8 +1025,8 @@ ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
 
 hold off
 
-legtxt3 = {'Fractal soot', 'Compact soot', 'Tarball', 'Softball',...
-    'Hybrid', 'Miscellaneous'};
+legtxt3 = {'Soot', 'Tarball', 'Ash', 'Softball', 'Hybrid',...
+    'Miscellaneous'};
 leg3 = legend(legtxt3, 'FontName', 'SansSerif', 'FontSize', 11);
 leg3.Layout.Tile = 'east';
 leg3.Title.String = 'Morphological type';

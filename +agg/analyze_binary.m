@@ -188,11 +188,9 @@ for ii=1:length(imgs_binary) % loop through provided images
         
         
         %== Compute aggregate dimensions/parameters ======================%
-        SE = strel('disk', 1);
-        img_dilated = imdilate(img_binary,SE);
-        img_edge_in = img_dilated - img_binary;
-        img_eroded = imerode(img_binary,SE);
-        img_edge_out = img_eroded - img_binary;
+%         SE = strel('disk', 1);
+%         img_dilated = imdilate(img_binary,SE);
+%         img_edg = img_dilated - img_binary;
         
         [row, col] = find(imcrop(Aggs0(jj).binary, Aggs0(jj).rect));
         Aggs0(jj).length = max((max(row)-min(row)), (max(col)-min(col))) * pixsize(ii);
@@ -206,14 +204,27 @@ for ii=1:length(imgs_binary) % loop through provided images
             pixsize(ii) ^ 2; % aggregate area [nm^2]
         Aggs0(jj).Rg = gyration(img_binary, pixsize(ii)); % calculate radius of gyration [nm]
         
-        Aggs0(jj).perimeter = pixsize(ii) * (sum(sum(img_edge_in~=0)) +...
-            sum(sum(img_edge_out~=0))) / 2; % calculate aggregate perimeter
+        % Aggs0(jj).perimeter = pixsize(ii) * (sum(sum(img_edg~=0))); % calculate aggregate perimeter
+        
+        % calculate perimeter: new method
+        img_edg = bwboundaries(img_binary);
+        n_edg = length(img_edg{1});
+        p_agg = 0;
+        for i = 1 : n_edg
+            if i ~= n_edg
+                p_agg = p_agg + sqrt(sum((img_edg{1}(i+1,:) - img_edg{1}(i,:)).^2));
+            else
+                p_agg = p_agg + sqrt(sum((img_edg{1}(1,:) - img_edg{1}(i,:)).^2));
+            end
+        end
+        Aggs0(jj).perimeter = p_agg;
         
         [x,y] = find(img_binary ~= 0);
         Aggs0(jj).center_mass = [mean(x); mean(y)];
         
         p_c = 2 * sqrt(pi * Aggs0(jj).area); % perimeter of aggregate area-equivalent circle
-        Aggs0(jj).ca = p_c / Aggs0(jj).perimeter; % aggregate area-equiv. circulirity
+        
+        Aggs0(jj).ca = p_c / p_agg; % aggregate area-equiv. circulirity
             % the degree of being close to a circle (1: circle, 0: straight line)
         
         agg_grayscale = img(CC.PixelIdxList{1,jj}); % the selected agg's grayscale pixel values
