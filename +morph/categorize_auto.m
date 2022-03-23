@@ -20,7 +20,7 @@ hf = struct(); % plot storage structure
     
 % compile the aggregate (quantitative) properties
 da = cat(1, Aggs.da); % area equivalent diameter
-ca = cat(1, Aggs.ca); % area equivalent circularity
+ac = cat(1, Aggs.ac); % area equivalent acircularity
 od = cat(1, Aggs.zbar_opt); % optical depth
 % cat(1, Aggs.sbar_opt);
 os = rand(n_agg_tot0,1); % optical sharpness
@@ -56,20 +56,20 @@ end
 
 % Removing diverged/ data
 ii0 = da > 1e4;
-jj0 = (ca > 2) | (ca < -1);
+jj0 = (ac > 2) | (ac < -1);
 kk0 = (od > 2) | (od < -1);
 ll0 = (os > 2) | (os < -1);
 mm0 = fn0(:,5) == 0;
 rmv = ii0 | jj0 | kk0 | ll0 | mm0;
 da(rmv) = [];
-ca(rmv) = [];
+ac(rmv) = [];
 od(rmv) = [];
 os(rmv) = [];
 fn0(rmv,:) = [];
 
 % range of properties
 del_da = [min(da), max(da)];
-del_ca = [min(ca), max(ca)];
+del_ac = [min(ac), max(ac)];
 del_od = [min(od), max(od)];
 del_os = [min(os), max(os)];
 
@@ -81,13 +81,18 @@ for i = 1 : n_bin(1)
 end
 % da_bin = del_da(1) + (del_da(2) - del_da(1)) .*...
 %     log(1 : (exp(1) - 1) / n_bin(1) : exp(1));
-ca_bin = del_ca(1) + (del_ca(2) - del_ca(1)) .* (0 : 1 / n_bin(2) : 1);
+r_ac = (del_ac(2) / del_ac(1))^(1 / n_bin(2));
+ac_bin = del_ac(1) * ones(1, n_bin(2) + 1);
+for j = 1 : n_bin(2)
+    ac_bin(j+1) = ac_bin(j+1) * r_ac^(j);
+end
+% ca_bin = del_ca(1) + (del_ca(2) - del_ca(1)) .* (0 : 1 / n_bin(2) : 1);
 od_bin = del_od(1) + (del_od(2) - del_od(1)) .* (0 : 1 / n_bin(3) : 1);
 os_bin = del_os(1) + (del_os(2) - del_os(1)) .* (0 : 1 / n_bin(4) : 1);
 
 % initialize the bin centers
 da_c = zeros(n_bin(1),1);
-ca_c = zeros(n_bin(2),1);
+ac_c = zeros(n_bin(2),1);
 od_c = zeros(n_bin(3),1);
 os_c = zeros(n_bin(4),1);
 
@@ -103,13 +108,11 @@ fn2 = {zeros(n_bin(1), n_bin(2)), zeros(n_bin(1), n_bin(3)),...
     zeros(n_bin(2), 6), zeros(n_bin(3), n_bin(4)),...
     zeros(n_bin(3), 6), zeros(n_bin(4), 6),}; % 2d frequencies
 
-
-
 %% assign to 1d bins %%
 
 % initialize optical depth colorcoding arrays
 od_da = zeros(n_bin(1),2);
-od_ca = zeros(n_bin(2),2);
+od_ac = zeros(n_bin(2),2);
 od_os = zeros(n_bin(4),2);
 od_mt = zeros(6,2);
 
@@ -133,23 +136,23 @@ end
 [~, od_da(:,2)] = sort(od_da(:,1)); % sort based on average optical...
     % ...depth for certain size bins
 
-% circularity binning
+%Century Gothic binning
 for j = 1 : n_bin(2)
     if j == 1
-        jj = ca < ca_bin(j+1);
+        jj = ac < ac_bin(j+1);
     elseif j < n_bin(2)
-        jj = (ca >= ca_bin(j)) & (ca < ca_bin(j+1));
+        jj = (ac >= ac_bin(j)) & (ac < ac_bin(j+1));
     else
         jj = fn0(:,2) == 0;
     end
     
-    ca_c(j) = (ca_bin(j) + ca_bin(j+1)) / 2;
-    od_ca(j,1) = sum(od(jj)) / length(jj);
-    fn0(jj,2) = j; % column 2 to be circularity bin labels    
-    fn1{2}(j) = nnz(jj) / n_agg_tot; % circularity freqs. (%)
+    ac_c(j) = sqrt(ac_bin(j) * ac_bin(j+1));
+    od_ac(j,1) = sum(od(jj)) / length(jj);
+    fn0(jj,2) = j; % column 2 to be acircularity bin labels    
+    fn1{2}(j) = nnz(jj) / n_agg_tot; % acircularity freqs. (%)
 end
 
-[~, od_ca(:,2)] = sort(od_ca(:,1));
+[~, od_ac(:,2)] = sort(od_ac(:,1));
 
 % optical depth binning
 for k = 1 : n_bin(3)
@@ -206,20 +209,24 @@ tt1 = tiledlayout(2,3);
 tt1.TileSpacing = 'loose';
 tt1.Padding = 'loose';
 
-% circularity subplot
+% acircularity subplot
 nexttile(1);
 
-bc1 = bar(ca_c, 100 * fn1{2}, 'FaceColor', 'flat');
 cm11 = colormap(autumn);
 jjj = round(1 + (length(cm11) - 1) .* (0.1 : 0.8 / (n_bin(2) - 1) : 0.9)');
 cm11 = cm11(jjj,:); % get the descretized colormap
 cm11 = flip(cm11,1);
-bc1.CData = cm11(od_ca(:,2),:);
+for j= 1 : n_bin(2)
+    rectangle('Position',[ac_bin(j), 0, (ac_bin(j+1) - ac_bin(j)),...
+         100 * fn1{2}(j)], 'FaceColor', cm11(od_ac(j,2),:));
+end
+% bc1 = bar(ac_c, 100 * fn1{2}, 'FaceColor', 'flat');
+% bc1.CData = cm11(od_ca(:,2),:);
 hold on
 
 err1 = sqrt((fn1{2} / n_agg_tot) .* (1 + fn1{2}) / n_agg_tot);
     % standard error propagation
-eb1 = errorbar(ca_c, 100 * fn1{2}, 100 * err1, '.');
+eb1 = errorbar(ac_c, 100 * fn1{2}, 100 * err1, '.');
 eb1.Color = [0.1 0.1 0.1];
 eb1.CapSize = 5;
 eb1.MarkerSize = 0.1;
@@ -228,12 +235,15 @@ box on
 axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.015 0.015], 'TickDir', 'out')
-
-xticks(ca_c)
+set(gca, 'XScale', 'log')
+set(gca, 'Layer', 'top')
+xticks(ac_bin)
 xtickformat('%.2f')
 xtickangle(45)
+set(gca, 'XMinorTick', 'off')
+xlim([del_ac(1), del_ac(2)])
 ylim([0 10 * ceil(10 * max(fn1{2} + err1))])
-xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+xlabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 ylabel('Frequency (%)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
@@ -242,12 +252,17 @@ hold off
 % optical depth subplot
 nexttile(2);
 
-bc2 = bar(od_c, 100 * fn1{3}, 'FaceColor', 'flat');
 cm12 = colormap(gray);
 kkk = round(1 + (length(cm12) - 1) .* (0.1 : 0.8 / (n_bin(3) - 1) : 0.9)');
 cm12 = cm12(kkk,:);
 cm12 = flip(cm12,1);
-bc2.CData = cm12;
+for k= 1 : n_bin(3)
+    rectangle('Position',[od_bin(k), 0, (od_bin(k+1) - od_bin(k)),...
+         100 * fn1{3}(k)], 'FaceColor', cm12(k,:));
+end
+
+% bc2 = bar(od_c, 100 * fn1{3}, 'FaceColor', 'flat');
+% bc2.CData = cm12;
 hold on
 
 err2 = sqrt((fn1{3} / n_agg_tot) .* (1 + fn1{3}) / n_agg_tot);
@@ -260,9 +275,12 @@ box on
 axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.015 0.015], 'TickDir', 'out')
-xticks(od_c)
+set(gca, 'Layer', 'top')
+xticks(od_bin)
 xtickformat('%.2f')
 xtickangle(45)
+set(gca, 'XMinorTick', 'off')
+xlim([del_od(1), del_od(2)])
 ylim([0 10 * ceil(10 * max(fn1{3} + err2))])
 xlabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
@@ -381,7 +399,7 @@ title(tt1, 'Univariate frequencies of morphological properties',...
 
 %% assign to 2d bins %%
 
-% size distribution vs. circularity
+% size distribution vs. acircularity
 for i = 1 : n_bin(1)
     for j = 1 : n_bin(2)
         fn2{1}(i,j) = nnz((fn0(:,1) == i) & (fn0(:,2) == j)) / n_agg_tot;
@@ -409,21 +427,21 @@ for i = 1 : n_bin(1)
     end
 end
 
-% circularity vs. optical depth
+% acircularity vs. optical depth
 for j = 1 : n_bin(2)
     for k = 1 : n_bin(3)
         fn2{5}(j,k) = nnz((fn0(:,2) == j) & (fn0(:,3) == k)) / n_agg_tot;
     end
 end
 
-% circularity vs. sharpness
+% acircularity vs. sharpness
 for j = 1 : n_bin(2)
     for l = 1 : n_bin(4)
         fn2{6}(j,l) = nnz((fn0(:,2) == j) & (fn0(:,4) == l)) / n_agg_tot;
     end
 end
 
-% circularity vs. morphological type
+% acircularity vs. morphological type
 for j = 1 : n_bin(2)
     for m = 1 : 6
         fn2{7}(j,m) = nnz((fn0(:,2) == j) & (fn0(:,5) == m)) / n_agg_tot;
@@ -464,10 +482,10 @@ tt2 = tiledlayout(6,10);
 tt2.TileSpacing = 'loose';
 tt2.Padding = 'loose';
 
-% size distribution vs circularity subplot
+% size distribution vs acircularity subplot
 tt2_1 = nexttile(1, [2,2]);
 
-pc1 = pcolor(da_bin, ca_bin, 100 * [(fn2{1})', zeros(n_bin(2), 1);...
+pc1 = pcolor(da_bin, ac_bin, 100 * [(fn2{1})', zeros(n_bin(2), 1);...
     zeros(1, n_bin(1) + 1)]);
 cm21 = colormap(tt2_1, hot);
 cm21 = flip(cm21,1);
@@ -483,10 +501,11 @@ set(gca, 'XScale', 'log')
 xlim(del_da)
 xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
-yticks(ca_bin)
-ytickformat('%.2f')
-ylim(del_ca)
-ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'YScale', 'log')
+% yticks(ac_bin)
+% ytickformat('%.2f')
+ylim(del_ac)
+ylabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 
 cb1 = colorbar;
@@ -580,14 +599,18 @@ cb3.Label.Position = [cb3_pos(1) + 3.5, cb3_pos(2) + 2.8];
 
 hold off
 
-% circularity vs optical depth subplot
+% acircularity vs optical depth subplot
 tt2_4 = nexttile(3, [2,2]);
 
-isc4 = imagesc(ca_c, od_c, 100 * (fn2{5})');
+% isc4 = imagesc(ac_c, od_c, 100 * (fn2{5})');
+pc4 = pcolor(ac_bin, od_bin, 100 * [(fn2{5})', zeros(n_bin(3), 1);...
+    zeros(1, n_bin(2) + 1)]);
 cm24 = colormap(tt2_4, copper);
 cm24 = flip(cm24,1);
 colormap(tt2_4, cm24)
 % isc4.Interpolation = 'bilinear';
+% pc1.FaceColor = 'interp';
+% pc1.EdgeColor = 'none';
 
 box on
 axis padded
@@ -595,10 +618,11 @@ grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1, 'YDir', 'normal')
-xlim(del_ca)
-xticks(ca_bin)
-xtickformat('%.2f')
-xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'XScale', 'log')
+xlim(del_ac)
+% xticks(ac_bin)
+% xtickformat('%.2f')
+xlabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 ylim(del_od)
 yticks(od_bin)
@@ -620,10 +644,52 @@ cb4.Label.Position = [cb4_pos(1) + 3.5, cb4_pos(2) + 5.2];
 
 hold off
 
-% circularity vs sharpness subplot
+% tt2_1 = nexttile(1, [2,2]);
+% 
+% pc1 = pcolor(da_bin, ac_bin, 100 * [(fn2{1})', zeros(n_bin(2), 1);...
+%     zeros(1, n_bin(1) + 1)]);
+% cm21 = colormap(tt2_1, hot);
+% cm21 = flip(cm21,1);
+% colormap(tt2_1, cm21)
+% % pc1.FaceColor = 'interp';
+% % pc1.EdgeColor = 'none';
+% 
+% box on
+% axis padded
+% set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
+%     'TickLength', [0.02 0.02], 'TickDir', 'out')
+% set(gca, 'XScale', 'log')
+% xlim(del_da)
+% xlabel('Projected area-equivalent diameter (nm)', 'FontName',...
+%     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
+% set(gca, 'YScale', 'log')
+% % yticks(ac_bin)
+% % ytickformat('%.2f')
+% ylim(del_ac)
+% ylabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+%     'FontWeight', 'bold')
+% 
+% cb1 = colorbar;
+% cb1.FontName = 'SansSerif';
+% cb1.FontSize = 10;
+% cb1.TickLength = 0.03;
+% cb1.Label.String = 'Frequency (%)';
+% cb1.Label.FontName = 'SansSerif';
+% cb1.Label.FontSize = 10;
+% cb1.Label.FontWeight = 'bold';
+% cb1.Label.Rotation = 270;
+% cb1_pos = get(cb1, 'Position');
+% cb1.Label.Position = [cb1_pos(1) + 3.5, cb1_pos(2) + 11]; % adjust...
+%     % ...colorbar label position
+% 
+% hold off
+% 
+% acircularity vs sharpness subplot
 tt2_5 = nexttile(23, [2,2]);
 
-isc5 = imagesc(ca_c, os_c, 100 * (fn2{6})');
+pc5 = pcolor(ac_bin, os_bin, 100 * [(fn2{6})', zeros(n_bin(4), 1);...
+    zeros(1, n_bin(2) + 1)]);
+% isc5 = imagesc(ac_c, os_c, 100 * (fn2{6})');
 cm25 = colormap(tt2_5, pink);
 cm25 = flip(cm25,1);
 colormap(tt2_5, cm25)
@@ -635,10 +701,11 @@ grid on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'TickDir', 'out', 'GridColor', [0, 0, 0],...
     'GridAlpha', 1, 'YDir', 'normal')
-xticks(ca_bin)
-xtickformat('%.2f')
-xlim(del_ca)
-xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+set(gca, 'XScale', 'log')
+% xticks(ac_bin)
+% xtickformat('%.2f')
+xlim(del_ac)
+xlabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 yticks(os_bin)
 ytickformat('%.2f')
@@ -739,10 +806,10 @@ cb7.Label.Position = [cb7_pos(1) + 3.5, cb7_pos(2) + 3.6];
 
 hold off
 
-% circularity vs morphlogical type
+% acircularity vs morphlogical type
 tt2_8 = nexttile(35, [3,3]);
 
-isc8 = pcolor((1 : 7), ca_bin, 100 * [fn2{7}, zeros(n_bin(2), 1);...
+isc8 = pcolor((1 : 7), ac_bin, 100 * [fn2{7}, zeros(n_bin(2), 1);...
     zeros(1, 7)]);
 cm28 = colormap(tt2_8, autumn);
 cm28 = flip(cm28,1);
@@ -761,10 +828,10 @@ xtickangle(45)
 xlim([1, 7])
 xlabel('Morphological type', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
-yticks(ca_bin)
+yticks(ac_bin)
 ytickformat('%.2f')
-ylim(del_ca)
-ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylim(del_ac)
+ylabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 
 cb8 = colorbar;
@@ -892,12 +959,12 @@ mt3 = {'*', 'o', '^', 'h', '+', 'x'};
 
 m5 = cell(6,1);
 
-% size vs circularity
+% size vs acircularity
 nexttile
 
 for m = 1 : 6
     m5{m} = (fn0(:,5) == m);
-    scatter(da(m5{m}), ca(m5{m}), 15, cm3(m,:), mt3{m})
+    scatter(da(m5{m}), ac(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -910,8 +977,8 @@ xtickangle(45)
 xlim(del_da)
 xlabel('Projected area equivalent diamter (nm)', 'FontName',...
     'SansSerif', 'FontSize', 12, 'FontWeight', 'bold')
-ylim(del_ca)
-ylabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+ylim(del_ac)
+ylabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 
 hold off
@@ -962,11 +1029,11 @@ ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
 
 hold off
 
-% circularity vs optical depth
+% acircularity vs optical depth
 nexttile
 
 for m = 1 : 6
-    scatter(ca(m5{m}), od(m5{m}), 15, cm3(m,:), mt3{m})
+    scatter(ac(m5{m}), od(m5{m}), 15, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -974,8 +1041,8 @@ box on
 axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
-xlim(del_ca)
-xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+xlim(del_ac)
+xlabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 ylim(del_od)
 ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -983,11 +1050,11 @@ ylabel('Optical depth (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
 
 hold off
 
-% circularity vs optical sharpness
+% acircularity vs optical sharpness
 nexttile
 
 for m = 1 : 6
-    scatter(ca(m5{m}), os(m5{m}), 10, cm3(m,:), mt3{m})
+    scatter(ac(m5{m}), os(m5{m}), 10, cm3(m,:), mt3{m})
     hold on
 end
 
@@ -995,8 +1062,8 @@ box on
 axis padded
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
-xlim(del_ca)
-xlabel('Circularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
+xlim(del_ac)
+xlabel('Acircularity (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
     'FontWeight', 'bold')
 ylim(del_os)
 ylabel('Optical sharpness (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
@@ -1043,7 +1110,7 @@ title(tt3, 'Trivariate dispersions of morphological properties',...
 fn.univar = fn1;
 fn.bivar = fn2;
 fn.labels = fn0;
-fn.bins = {da_bin, ca_bin, od_bin, os_bin, x4};
+fn.bins = {da_bin, ac_bin, od_bin, os_bin, x4};
 
 % update the plot structure if figures are requested as output,...
     % ...otherwise delete
