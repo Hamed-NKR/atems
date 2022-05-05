@@ -46,7 +46,7 @@ else
 end
 
 % obtain aggregate properties
-Aggs = agg.analyze_binary(imgs_binary, pixsizes, imgs, fname);
+Aggs = agg.analyze_binary_HN(imgs_binary, pixsizes, imgs, fname);
 
 agg_id = cat(1, Aggs.id); % aggregate ids
 img_id = cat(1, Aggs.img_id); % image ids corresponding to the aggregates
