@@ -204,36 +204,20 @@ for ii=1:length(imgs_binary) % loop through provided images
             pixsize(ii) ^ 2; % aggregate area [nm^2]
         Aggs0(jj).Rg = gyration(img_binary, pixsize(ii)); % calculate radius of gyration [nm]
         
-        Aggs0(jj).perimeter = pixsize(ii) * (sum(sum(img_edg~=0))); % calculate aggregate perimeter
+%         Aggs0(jj).perimeter0 = pixsize(ii) * (sum(sum(img_edg~=0))); % calculate aggregate perimeter
         
-%         % calculate perimeter: new method
-%         img_edg = bwboundaries(img_binary);
-%         n_edg = length(img_edg{1});
-%         p_agg = 0;
-%         for i = 1 : n_edg
-%             if i ~= n_edg
-%                 p_agg = p_agg + sqrt(sum((img_edg{1}(i+1,:) - img_edg{1}(i,:)).^2));
-%             else
-%                 p_agg = p_agg + sqrt(sum((img_edg{1}(1,:) - img_edg{1}(i,:)).^2));
-%             end
-%         end
-%         Aggs0(jj).perimeter = p_agg;
+        Aggs0(jj).perimeter = pixsize(ii) * get_perimeter2(img_edg);
         
         [x,y] = find(img_binary ~= 0);
         Aggs0(jj).center_mass = [mean(x); mean(y)];
         
         p_c = 2 * sqrt(pi * Aggs0(jj).area); % perimeter of aggregate area-equivalent circle
         
-        Aggs0(jj).ac = Aggs0(jj).perimeter / p_c; % aggregate area-equiv. acirculirity
-            % the degree of being far from a circle (1: circle, inf: straight line)
+        Aggs0(jj).ca = p_c / Aggs0(jj).perimeter; % aggregate area-equiv. circulirity
+            % the degree of being far from a circle (1: circle, 0: straight line)
         
         agg_grayscale = img(CC.PixelIdxList{1,jj}); % the selected agg's grayscale pixel values
-        if isa(img, 'uint16')
-            Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^16 - 1);
-                % agg's optical depth metric (1: black, 0: white)
-        else
-            Aggs0(jj).zbar_opt = 1 - (I_backgr - mean(agg_grayscale)) / (2^8 - 1);
-        end
+            Aggs0(jj).zbar_opt = (I_backgr - mean(agg_grayscale)) / I_backgr; % agg's optical depth metric (1: black, 0: white)
         
         
         
@@ -311,4 +295,47 @@ rect = [y_bottom,x_bottom,(y_top-y_bottom),(x_top-x_bottom)];
 
 end
 
+%== GET_PERIMETER2 =============================================================%
+%   An updated method to get the perimeter of the aggregate.
+function p = get_perimeter2(img_binary)
+ 
+mb = bwboundaries(img_binary);
+n_mb = length(mb{1});
+ 
+x_mb = mb{1}(:,2);
+y_mb = mb{1}(:,1);
+ii_mb = ones(n_mb,1);
 
+[x_mb, y_mb] = poly2cw(x_mb, y_mb);
+
+ii = 1;
+for i = 2 : n_mb
+    ii_mb(i) = ii;
+    if (x_mb(i) ~= x_mb(i-1)) && (y_mb(i) ~= y_mb(i-1))
+        ii_mb(i) = ii_mb(i) + 1;
+        ii = ii + 1;
+    end
+end
+
+if (x_mb(1) == x_mb(end)) || (y_mb(1) == y_mb(end))
+    ii_mb(ii_mb == ii_mb(end)) = 1;
+end
+
+nn_mb = max(ii_mb);
+xx_mb = zeros(nn_mb,1);
+yy_mb = zeros(nn_mb,1);
+p = 0;
+
+for i = 1 : nn_mb
+    xx_mb(i) = mean(x_mb(ii_mb == i));
+    yy_mb(i) = mean(y_mb(ii_mb == i));
+    
+    if i > 1
+        p = p + sqrt((xx_mb(i) - xx_mb(i-1))^2 +...
+           (yy_mb(i) - yy_mb(i-1))^2);
+    end
+end
+p = p + sqrt((xx_mb(1) - xx_mb(end))^2 +...
+    (yy_mb(1) - yy_mb(end))^2);
+ 
+end

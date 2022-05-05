@@ -114,3 +114,36 @@ fprintf('pc_edgerd = %f\n', pc_edgerd);
 % imshow(edg_erd);
 imov2 = imoverlay(img, edg_erd, 'b');
 imshow(imov2);
+
+% pc_final = get_perimeter2(~img);
+% fprintf('pc_final = %f\n', pc_final);
+
+%== GET_PERIMETER2 =============================================================%
+%   An updated method to get the perimeter of the aggregate.
+%   AUTHOR:  Hamed Nikookar, Timothy Sipkens, 2022-03-25
+function p = get_perimeter2(img_binary)
+ 
+mb = bwboundaries(img_binary);  % time-limiting step
+ 
+x_mb = mb{1}(:,2);  % get x and y coordinates
+y_mb = mb{1}(:,1);
+ 
+fx = [0; x_mb(2:end) ~= x_mb(1:end-1)];  % flag change in x
+fy = [0; y_mb(2:end) ~= y_mb(1:end-1)];  % flag change in y
+ii_mb = cumsum(and(fx, fy)) + 1;  % count diagonal elements
+ 
+% Combine first and last elements
+if (x_mb(1) == x_mb(end)) || (y_mb(1) == y_mb(end))
+    ii_mb(ii_mb == ii_mb(end)) = 1;
+end
+ 
+% Average x and y over each line segment.
+n2 = accumarray(ii_mb, ones(length(ii_mb)));
+x2 = accumarray(ii_mb, x_mb) ./ n2;
+y2 = accumarray(ii_mb, y_mb) ./ n2;
+p = sum(sqrt(diff(x2) .^ 2 + diff(y2) .^ 2));
+p = p + ...
+    sqrt((x2(end) - x2(1)) .^ 2 + ...
+    (y2(end) - y2(1)) .^ 2);  % join outline
+ 
+end
