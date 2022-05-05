@@ -15,7 +15,7 @@ opts.bool_kmeans = 1;
 opts.bool_otsu = 0;
 imgs_binary = agg.seg(imgs, pixsizes, opts);
 
-Aggs = agg.analyze_binary(imgs_binary, ...
+Aggs = agg.analyze_binary(imgs_binary,...
     pixsizes, imgs, fname); % determine aggregate properties
 %-------------------------------------------------------------------------%
 
