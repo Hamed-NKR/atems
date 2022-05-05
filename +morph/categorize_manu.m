@@ -46,7 +46,7 @@ else
 end
 
 % obtain aggregate properties
-Aggs = agg.analyze_binary_HN(imgs_binary, pixsizes, imgs, fname);
+Aggs = morph.analyze_binary_HN(imgs_binary, pixsizes, imgs, fname);
 
 agg_id = cat(1, Aggs.id); % aggregate ids
 img_id = cat(1, Aggs.img_id); % image ids corresponding to the aggregates
@@ -125,17 +125,17 @@ for i = 1 : n_imgs
                 dims = [1 150];
                 defaultans = {''};
                 dlgopts.Interpreter = 'tex';
-                morph = inputdlg(prompt, dlgtitle, dims, defaultans, dlgopts);
+                morph0 = inputdlg(prompt, dlgtitle, dims, defaultans, dlgopts);
                 
             else
-                morph = morphstr(randsample(6,1));
+                morph0 = morphstr(randsample(6,1));
             end
             
             morph_check = 1; % initially assume morph. type input is valid
             
             % record the input (morph. type) in the aggregate properties
                 % ...datasheet
-            switch morph{1}
+            switch morph0{1}
                 case {'S', 's'}
                     Aggs(jj).Type = 'Soot';
                 case {'TB', 'Tb', 'tb'}
