@@ -35,7 +35,7 @@
 % 
 %  AUTHOR: Timothy Sipkens, 2019-11-26
 
-function [Aggs] = analyze_binary(imgs_binary, pixsize, ...
+function [Aggs] = analyze_binary_HN(imgs_binary, pixsize, ...
     imgs, fname, f_edges, f_plot)
 
 %-- Parse inputs ---------------------------------------------------------%
