@@ -151,7 +151,7 @@ for ii=1:length(imgs_binary) % loop through provided images
     
     % If more than 50 aggregates were found, the method likely failed. 
     % Skip this image and continue on. 
-    if naggs>50; continue; end
+    if naggs>100; continue; end
     
     % If no aggregates, skip image. 
     if naggs==0; continue; end

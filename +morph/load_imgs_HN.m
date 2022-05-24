@@ -21,7 +21,7 @@
 % 
 %  AUTHOR: Timothy Sipkens, 2019-07-04
 
-function [Imgs, imgs, pixsize] = load_imgs(fd, n)
+function [Imgs, imgs, pixsize] = load_imgs_HN(fd, n)
 
 tools.textheader('Loading images');
 
@@ -188,22 +188,11 @@ for jj=1:length(Imgs)
             pixsize_end = strfind(o1.Text, txts(kk)) - 1;
             if ~isempty(pixsize_end)
                 % Mark if unit read is not nm.
-<<<<<<< HEAD:+morph/load_imgs_HN.m
-<<<<<<< HEAD
-=======
->>>>>>> tsipkens-master:+tools/load_imgs.m
+                
                 if contains(txts(kk), 'um')
                     f_nm = 0;
                 elseif contains(txts(kk), 'pm')
                     f_nm = 2;
-<<<<<<< HEAD:+morph/load_imgs_HN.m
-=======
-                if or(contains(txts(kk), 'um'), ...
-                        contains(txts(kk), 'pm'))
-                    f_nm = 0;
->>>>>>> master
-=======
->>>>>>> tsipkens-master:+tools/load_imgs.m
                 end
                 break;
             end
@@ -279,25 +268,12 @@ for jj=1:length(Imgs)
         
         % Finally, convert formatted text to a number.
         Imgs(jj).pixsize = str2double(o1_Text);
-<<<<<<< HEAD:+morph/load_imgs_HN.m
-<<<<<<< HEAD
-=======
->>>>>>> tsipkens-master:+tools/load_imgs.m
 
         % Convert pixsize to nm.
         if f_nm == 0  % if given in micrometers
             Imgs(jj).pixsize = Imgs(jj).pixsize * 1e3;
         elseif f_nm == 2  % if given in picometers
             Imgs(jj).pixsize = Imgs(jj).pixsize / 1e3;
-<<<<<<< HEAD:+morph/load_imgs_HN.m
-=======
-        
-        % Convert pixsize to nm.
-        if f_nm == 0  % if given in micrometers
-            Imgs(jj).pixsize = Imgs(jj).pixsize * 1e3;
->>>>>>> master
-=======
->>>>>>> tsipkens-master:+tools/load_imgs.m
         end
         
     end

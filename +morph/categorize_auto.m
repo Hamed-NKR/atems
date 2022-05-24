@@ -6,9 +6,9 @@ function [fn, hf] = categorize_auto(Aggs, n_bin)
 % n_bin: numbers of post-processing bins (a 4 member vector for size,...
 %   ...circularity, optical depth, and sharpness; also can be a single...
 %   ...universal number for all)
-% fn: A structure containing the morphological frequency data
+% fn: a structure containing the morphological frequency data
 % Aggs: aggregates' table of properties
-% hf: A structure for figure handles of the frequency plots
+% hf: a structure for figure handles of the frequency plots
 % ----------------------------------------------------------------------- %
 
 %% Initializations %%
@@ -740,7 +740,9 @@ tt2_7 = nexttile(5, [3,3]);
 
 pc7 = pcolor((1 : 7), da_bin, 100 * [fn2{4}, zeros(n_bin(1), 1);...
     zeros(1, 7)]);
-colormap(tt2_7, spring)
+cm27 = colormap(tt2_7, bone);
+cm27 = flip(cm27,1);
+colormap(tt2_7, cm27)
 % pc7.FaceColor = 'interp';
 % pc7.EdgeColor = 'none';
 
@@ -898,8 +900,8 @@ cb10.Label.Position = [cb10_pos(1) + 3.5, cb10_pos(2) + 2.4];
 
 hold off
 
-title(tt2, 'Bivariate frequencies of morphological properties',...
-    'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
+% title(tt2, 'Bivariate frequencies of morphological properties',...
+%     'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)
 
 %% Draw trivariate colorcoded scatter plots %%
 
