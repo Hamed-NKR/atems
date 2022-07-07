@@ -1,33 +1,55 @@
-function [I, G_I, h] = spoptics(Aggs, id_im, id_par, opts)
-% SPMONITOR tracks the variations of optical properties properties...
-%   ...within single particles.
+function [I, Ic, GI, GIc] = spoptics(Aggs, id_im, id_par, opts)
+% SPOPTICS tracks the variations of optical properties within single...
+%   ...particles.
 % ----------------------------------------------------------------------- %
-% Aggs: aggregates table of properties
+% Aggs: particle table of properties
 % id_im: index of image to be analyze
 % id_par: particle index within the image
-% opts: a strcuture containing the options available for plotting.
-% h: output figure handle
-% pardat: sampling line optica
+% opts: a strcuture containing the options available for analysis and plotting
+% I: image intensity distribution
+% Ic: cumulative intensity distribution
+% GI: distribution of intensity gradient magnitude
+% GIc: cumulative distribution of intensity gradient magnitude
 % ----------------------------------------------------------------------- %
 
-% initialize options if not given
-if ~(exist('opts', 'var') && isfield(opts, 'n_ang') &&...
-        isfield(opts, 'c_dil'))
-    opts = struct('n_ang', [], 'c_dil', []);
+if ~exist('opts', 'var')
+    opts = struct();
 end
 
-n_ang = opts.n_ang; % number of angles to be analyzed
-c_dil = opts.c_dil; % dilation factor for data sampling line
+% Setting defaults for the sampling line
 
-% set defaults for opts
-if isempty(n_ang)
-    n_ang = 4;
+% domain extension factor for sampling
+if ~isfield(opts, 'cc')
+    opts.cc = [];
 end
-if isempty(c_dil)
-    c_dil = 3;
+cc = opts.cc;
+if isempty(cc) || (cc <= 1)
+    cc = 1.2;
+    % warning('Unsuitable extention factor; automatically adjusted...')
 end
 
-% adjust the ids if not acceptable
+% number of radial points used for the distribution sampling
+if ~isfield(opts, 'nr')
+    opts.nr = [];
+end
+nr = opts.nr;
+if isempty(nr)  || nr < 50
+    nr = 100;
+else
+    nr = round(nr(1));
+end
+
+% number of angular increments for distribution averaging
+if ~isfield(opts, 'na')
+    opts.na = [];
+end
+na = opts.na;
+if isempty(na) || na < 20
+    na = 360;
+else
+    na = round(na(1));
+end
+
 % n_par = length(Aggs); % total particle number
 n_im = max(cat(1, Aggs.img_id)); % total image number
 im_ids = zeros(n_im,1); % particle ids corresponding to the start of each image
@@ -37,12 +59,17 @@ for i = 1 : n_im
     im_ids(i) = find(Aggs_im_id == i, 1);
     par_n(i) = nnz(Aggs_im_id == i);
 end
+
+% adjust inputs if not acceptable
 if id_im > n_im
     id_im = n_im;
     warning('Image id exceeding the maximum value; adjusted to maximum...')
 elseif id_im < 1
     id_im = 1;
     warning('Image id below the minimum value; adjusted to minimum...')
+elseif mod(id_im, 1) ~= 0
+    id_im = round(id_im);
+    warning('Image id needs to be integer; input value rounded...')
 end
 if id_par > par_n(id_im)
     id_par = par_n(id_im);
@@ -50,12 +77,15 @@ if id_par > par_n(id_im)
 elseif id_par < 1
     id_par = 1;
     warning('Particle id below the minimum value; adjusted to minimum...')
+elseif mod(id_par, 1) ~= 0
+    id_par = round(id_par);
+    warning('Particle id needs to be integer; input value rounded...')
 end
 
 % initialize figure properties
 figure;
 h = gcf;
-h.Position = [0, 0, 900, 1200]; % position and size
+h.Position = [0, 0, 1100, 900]; % position and size
 set(h, 'color', 'white'); % background color
 
 % set the figure layout
@@ -63,11 +93,16 @@ tt = tiledlayout(2,2);
 tt.TileSpacing = 'compact';
 tt.Padding = 'compact';
 
+% set the color set
+lc = colormap(hot); % initialize the colormap of sampling lines
+ii = round(1 + (length(lc) - 1) .* (0.05 : 0.9 / 7 : 0.95)');
+lc = lc(ii,:); % descretize the colormap
+
 % original image
 tt1 = nexttile(1);
 id2_im = im_ids(id_im);
 tools.imshow(Aggs(id2_im).image)
-title(tt1, 'Original TEM image')
+title(tt1, 'Original TEM image', 'FontSize', 14)
 
 % image highlighting the selected aggregate and data sampling lines
 tt2 = nexttile(3);
@@ -80,69 +115,135 @@ se = strel('disk',1);
 edg_dilated = imdilate(par_edg, se);
 im2 = uint8(~edg_dilated) .* im2;
 tools.imshow(im2); % display the highlighted aggregate and the edge
-title(tt2, 'Particle selected & sampling lines')
+title(tt2, 'Particle selected & sampling lines', 'FontSize', 14)
 hold on
 
-% get sampling line start & end coordinates
-se2 = strel('disk',5);
-edg_dilated2 = imdilate(par_edg, se2);
-com = round(Aggs(id2_par).center_mass);
-lin = cell(n_ang,1);
-r = cell(n_ang,1);
-angs = 2 * pi * (0 : 1 / n_ang : 1);
-angs = angs(1 : end - 1);
+% get the nearest and furthest boundary points
+parbnd = bwboundaries(Aggs(id2_par).binary); % get the edge pixel locations
+% nb = length(parbnd{1});
+xb = parbnd{1}(:,1);
+yb = parbnd{1}(:,2);
+[xb, yb] = poly2cw(xb, yb); % organize edge points
+com = Aggs(id2_par).center_mass; % rown and column indices of agg com
+Rb = sqrt((xb - com(1)).^2 + (yb - com(2)).^2); % get the edge point distances from COM
+R1b = min(Rb);
+R2b = max(Rb);
 
-[x_e, y_e] = find(edg_dilated2 == 1);
-[x_e, y_e] = poly2cw(x_e, y_e);
+R0 = [(0.25 : 0.25 : 1)' * R1b; (R1b + R2b) / 2; R2b;...
+    1.1 * R2b; 1.2 * R2b]; % radii of highlighted sampling lines for visualization
+R = (0 : 1 / (nr - 1) : 1)' * cc * R2b; % descretized radii for distribution sampling 
 
-for i = 1 : n_ang
-    ii = max(((y_e - com(2)).^2 ./ (x_e - com(1)).^2) - tan(angs(i)) <...
-        pi / 180);
-    drawline('Position', [com(1) com(2); x_e(ii) y_e(ii)], 'Color', 'r')
-    lin{i} = unique(round([(0 : 100)' * (x_e(ii) - com(1)),...
-        (0 : 100)' * (y_e(ii) - com(2))]), 'row');
-    r{i} = sum(sqrt(lin{i}),2);
-    lin{i} = lin{i} + [com(1), com(2)];
+l_im = size(Aggs(id2_im).image); % overall size of the image analyzed
+
+[xn, yn] = meshgrid(1 : l_im(1), 1 : l_im(2)); % generate an index map for later intensity averaging
+
+% initialize placeholders for the distributions to be sampled
+I = zeros(nr,1); 
+GI = zeros(nr,1);
+Ic = zeros(nr,1); 
+GIc = zeros(nr,1);
+
+I0 = double(Aggs(id2_im).image); % image intensity
+[GxI0, GyI0] = gradient(I0); % gradients of the image
+GI0 = sqrt(GxI0.^2 + GyI0.^2); % magnitude of gradient throughout the image
+
+% angle increments for finding sample line coordinates
+theta = 0 : 2 * pi / na : 2 * pi;
+theta = theta(1 : end - 1);
+
+% plot the highlight circles
+phi = 0 : pi / 180 : 2 * pi;
+for ii = 1 : 8
+    x0 = com(1) +  R0(ii) * sin(phi');
+    y0 = com(2) +  R0(ii) * cos(phi');
+    
+    plot(y0, x0, 'Color', lc(ii,:), 'LineWidth', 1)
+end
+hold off
+
+disp(' ')
+disp('Pefroming radial intensity sampling...')
+tools.textbar([0, nr]); % initialize textbar
+
+for i = 1 : nr    
+    % get the line points
+    x = com(1) +  R(i) * sin(theta');
+    y = com(2) +  R(i) * cos(theta');
+    
+    % correct for outside image points
+    x(x < 1) = 1;
+    x(x > l_im(1)) = l_im(1);
+    y(y < 1) = 1;
+    y(y > l_im(2)) = l_im(2);
+        
+    % interpolate the intensity and its gradient, take average and accumulate
+    I(i) = mean(interp2(xn, yn, I0, x, y));
+    Ic(i) = sum(I) / nnz(I);
+    GI(i) = mean(interp2(xn, yn, GI0, x, y));
+    GIc(i) = sum(GI) / nnz(GI);
+    
+    tools.textbar([i, nr]); % update textbar
 end
 
-% pixel intensity on the lines drawn
+% generate legend labels
+lgdtxt = {'R = 0.25 R_{b_i}', 'R = 0.5 R_{b_i}', 'R = 0.75 R_{b_i}',...
+    'R = R_{b_i}', 'R = (R_{b_i} + R_{b_o}) / 2', 'R = R_{b_o}',...
+    'R = 1.1 R_{b_o}', 'R = 1.2 R_{b_o}'}; 
+lgd = legend(lgdtxt, 'interpreter', 'tex', 'FontName', 'SansSerif',...
+    'FontSize', 11);
+lgd.Layout.Tile = 'east';
+hold off
+
+% plot radial intensity distribution
 tt3 = nexttile(2);
-I = cell(n_ang,1);
-for i = 1 : n_ang
-    I{i} = zeros(length(r{i}),1);
-    for j = 1 : length(r{i})
-        I{i}(j) = Aggs(id2_im).image(lin{i}(j,1), lin{i}(j,2));
-        plot(r{i}(j), I{i}(j))
-        hold on
-    end
+
+yyaxis left
+plot(R, I, 'LineWidth', 2);
+ylabel('Local mean intensity (-)', 'FontName', 'SansSerif', 'FontSize', 12)
+hold on
+
+yyaxis right
+plot(R, Ic, 'LineWidth', 2);
+ylabel('Cumulative mean intensity (-)', 'FontName', 'SansSerif', 'FontSize', 12)
+
+y3 = ylim;
+for ii = 1 : 8
+    line([R0(ii), R0(ii)], [y3(1), y3(2)], 'Color', lc(ii,:),...
+        'LineWidth', 1.5, 'LineStyle', '--')
 end
+
 box on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
-set(gca, 'XMinorTick', 'off')
-xlabel('r (pix)', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
-ylabel('I (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
-title(tt3, 'Intensity distrubution')
+xlabel('Radial distance from COM (pix)', 'FontName', 'SansSerif', 'FontSize', 12)
+xlim([R(1), R(end)])
+title(tt3, 'Intensity distrubution', 'FontSize', 14)
 hold off
 
-% gradient of pixel intensity
+% plot the gradient of radial intensity distribution
 tt4 = nexttile(4);
-G_I = cell(n_ang,1);
-for i = 1 : n_ang
-    G_I{i} = gradient(I{i});
-    plot(r{i}, G_I{i})
-    hold on
+
+yyaxis left
+plot(R, GI, 'LineWidth', 2);
+ylabel('Local mean intensity gradient (pix^{-1})', 'FontName', 'SansSerif', 'FontSize', 12)
+hold on
+
+yyaxis right
+plot(R, GIc, 'LineWidth', 2);
+ylabel('cumulative mean intensity gradient (pix^{-1})', 'FontName', 'SansSerif', 'FontSize', 12)
+
+y4 = ylim;
+for ii = 1 : 8
+    line([R0(ii), R0(ii)], [y4(1), y4(2)], 'Color', lc(ii,:),...
+        'LineWidth', 1.5, 'LineStyle', '--')
 end
+
 box on
 set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
     'TickLength', [0.01 0.01], 'TickDir', 'out')
-set(gca, 'XMinorTick', 'off')
-xlabel('r (pix)', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
-ylabel('I (-)', 'FontName', 'SansSerif', 'FontSize', 12,...
-    'FontWeight', 'bold')
-title(tt4, 'Intensity gradient distrubution')
+xlabel('r (pix)', 'FontName', 'SansSerif', 'FontSize', 12)
+xlim([R(1), R(end)])
+title(tt4, 'Intensity gradient distrubution', 'FontSize', 14)
 hold off
+
 

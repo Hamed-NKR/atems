@@ -2,7 +2,7 @@ clc
 clear
 close all
 
-[Imgs, imgs, pixsizes] = morph.load_imgs_HN('D:\Hamed\PRS\CND\PhD\TEM\FF\ATEMS-Test\Test2');
+[Imgs, imgs, pixsizes] = morph.load_imgs_HN('D:\Hamed\PRS\CND\PhD\TEM\FF\ATEMS-Test\Test6');
 fname = {Imgs.fname};
 
 imgs_binary = agg.seg_kmeans(imgs, pixsizes);
