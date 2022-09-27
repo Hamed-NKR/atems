@@ -1,4 +1,4 @@
-function pp = manu_pp(fname0, da, fad0, n_hyb, opts)
+function pp = manu_pp_0(fnam0, da, fad0, opts)
 % "manu_pp" calculates the properties of primary particles extracted from...
 %   ...manual sizing of a real TEM aggregate.
 % ----------------------------------------------------------------------- %
@@ -15,7 +15,7 @@ function pp = manu_pp(fname0, da, fad0, n_hyb, opts)
 %   pp: Primary particle data structure
 % ----------------------------------------------------------------------- %
 
-n_agg = length(fname0); % Number of aggs to be analyzed
+n_agg = length(fnam0); % Number of aggs to be analyzed
 
 % Initialize the pp structure
 pp = struct();
@@ -32,29 +32,41 @@ if ~exist('opts', 'var')
 end
 
 if ~isfield(opts, 'visual')
-    opts.visual = []; % define plotting decision variable
+    opts.visual = [];
 end
 opts_visual = opts.visual;
 if isempty(opts_visual)
-    opts_visual = 'off'; % default not to plot the outputs
+    opts_visual = 'off'; % Default not to plot the outputs
 end
 
 if ~isfield(opts, 'lbl')
-    opts.lbl = cell(1, n_agg); % define aggregate labeling parameter
+    opts.lbl = cell(1, n_agg);
 end
 
-if (~exist('n_hyb', 'var')) || isempty(n_hyb)
-    n_hyb = ones(n_agg,1); % default for all to be non-hybrid
-end
+% if ~isfield(opts, 'nhyb')
+%     opts.nhyb = []; % number of hybridity regions
+% end
 
-p = cell(3,1); % placeholder for plots
-legtxt = cell(3,1); % legend text placeholder
+% % set colormap
+% if ~isempty(nhyb)
+%     mc = colormap(turbo);
+%     ii = round(1 + (length(mc) - 1) .*...
+%         (0.05 : 0.9 / (length(unique(n_hyb)) - 1) : 0.95)');
+%     mc = mc(ii,:);
+%     mc = flip(mc,1);
+%     
+%     [nhyb_s, I_s] = sort(nhyb);
+%     nhyb_us = unique(nhyb);
+%     
+% end
+% 
+% % adjust coloring order based on number of hybridity regions
 
-pp.fname = fname0; % store file names
+pp.fname = fnam0; % store file names
 
 % Import the data and calculate properties
 for i = 1 : n_agg
-    fad = strcat(fad0, fname0{i}, '.csv'); % Making file address
+    fad = strcat(fad0, fnam0{i}, '.csv'); % Making file address
     ppdat = readmatrix(fad); % Scanning data
     
     pp.n(i) = size(ppdat, 1) - 2; % Removing the header and the scale detector 
@@ -82,40 +94,22 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
         'LineStyle', '-.', 'LineWidth', 2.5);
     hold on
     
-    p{1} = scatter(da(n_hyb == 1), pp.mu_d(n_hyb == 1), 35, [0.6350 0.0780 0.1840], '^');
-    legtxt{1} = 'Near-uniform';
+    % Plot manually sized aggs
+%     if ~isempty(nhyb)
+%         iii = find(nhyb == nhyb_us(i));
+%     else
+        p2 = scatter(da, pp.mu_d(:,2), 25, [0.8500 0.3250 0.0980], '^');
     
-    p{2} = scatter(da(n_hyb == 2), pp.mu_d(n_hyb == 2), 50, [0.4940 0.1840 0.5560], 's');
-    legtxt{2} = 'Hybrid, \itn_{hyb,vis}\rm = 2';
-    
-    p{3} = scatter(da(n_hyb > 2), pp.mu_d(n_hyb > 2), 50, [0 0.4470 0.7410], 'o');
-    legtxt{3} = 'Hybrid, \itn_{hyb,vis}\rm > 2';
-
     if (~isfield(opts, 'eb')) || isempty(opts.eb)
         opts.eb = 'on'; % default to plot errorbars
     end
     opts_eb = opts.eb;
     if ismember(opts_eb, {'ON', 'On', 'on'})
-        % calculate error bounds
-        e_p = pp.mu_d .* abs(pp.std_d - 1);
-        e_n = pp.mu_d .* abs(1 - 1 ./ pp.std_d);
-        
-        eb = cell(3,1);
-        
-        eb(1) = errorbar(da(n_hyb == 1), pp.mu_d(n_hyb == 1),...
-            e_n(n_hyb == 1), e_p(n_hyb == 1), 'Marker', 'none',...
+        e_p = pp.mu_d(:,2) .* abs(pp.std_d(:,2) - 1);
+        e_n = pp.mu_d(:,2) .* abs(1 - 1 ./ pp.std_d(:,2));
+        eb = errorbar(da, pp.mu_d(:,2), e_n, e_p, 'Marker', 'none',...
             'LineStyle', 'none');
-        eb(1).Color = [0.6350 0.0780 0.1840];
-        
-        eb(2) = errorbar(da(n_hyb == 2), pp.mu_d(n_hyb == 2),...
-            e_n(n_hyb == 2), e_p(n_hyb == 2), 'Marker', 'none',...
-            'LineStyle', 'none');
-        eb(2).Color = [0.4940 0.1840 0.5560];
-
-        eb(3) = errorbar(da(n_hyb > 2), pp.mu_d(n_hyb > 2),...
-            e_n(n_hyb > 2), e_p(n_hyb > 2), 'Marker', 'none',...
-            'LineStyle', 'none');
-        eb(3).Color = [0 0.4470 0.7410];        
+        eb.Color = [0.8500 0.3250 0.0980];
     end
     
     if (~isfield(opts, 'label')) || isempty(opts.label)
@@ -140,7 +134,7 @@ if ismember(opts_visual, {'ON', 'On', 'on'})
     ylim([5, 65])
     set(gca, 'XScale', 'log')
     set(gca, 'YScale', 'log')
-    legend([p1, cat(1, p{:})'], cat(2, {'Universal correlation'}, legtxt{:}),...
+    legend([p1, p2], {'Universal correlation', 'Manual'},...
         'Location', 'northwest', 'FontName', 'SansSerif', 'FontSize', 12);
     title('Primary particle size vs projected area equivalent size',...
         'FontName', 'SansSerif', 'FontWeight', 'bold', 'FontSize', 16)

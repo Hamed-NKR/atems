@@ -16,7 +16,7 @@ if ~exist('opts', 'var')
     opts = struct();
 end
 
-% Setting defaults for the sampling line
+%%% Setting defaults for the sampling line %%%
 
 % domain extension factor for sampling
 if ~isfield(opts, 'cc')
@@ -135,7 +135,7 @@ R = (0 : 1 / (nr - 1) : 1)' * cc * R2b; % descretized radii for distribution sam
 
 l_im = size(Aggs(id2_im).image); % overall size of the image analyzed
 
-[xn, yn] = meshgrid(1 : l_im(1), 1 : l_im(2)); % generate an index map for later intensity averaging
+[yn, xn] = meshgrid(1 : l_im(2), 1 : l_im(1)); % generate an index map for later intensity averaging
 
 % initialize placeholders for the distributions to be sampled
 I = zeros(nr,1); 
@@ -175,11 +175,11 @@ for i = 1 : nr
     x(x > l_im(1)) = l_im(1);
     y(y < 1) = 1;
     y(y > l_im(2)) = l_im(2);
-        
+    
     % interpolate the intensity and its gradient, take average and accumulate
-    I(i) = mean(interp2(xn, yn, I0, x, y));
+    I(i) = mean(interp2(xn', yn', I0', x, y));
     Ic(i) = sum(I) / nnz(I);
-    GI(i) = mean(interp2(xn, yn, GI0, x, y));
+    GI(i) = mean(interp2(xn', yn', GI0', x, y));
     GIc(i) = sum(GI) / nnz(GI);
     
     tools.textbar([i, nr]); % update textbar

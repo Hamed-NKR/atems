@@ -145,9 +145,16 @@ for ii=1:length(imgs_binary) % loop through provided images
     
     % Background optical depth
     CC_PixelIdxList = cell2mat(reshape(CC.PixelIdxList, naggs, 1));
-    seg_backgr = img(:);
-    seg_backgr(CC_PixelIdxList) = []; % segmented background grayscale image
-    I_backgr = mean(seg_backgr); % background image intensity
+    seg_bkg = img(:);
+    seg_bkg(CC_PixelIdxList) = []; % segmented background grayscale image
+    I_bkg = mean(seg_bkg); % background image intensity
+    
+    % Get image background gradient
+    [gx_img, gy_img] = gradient(double(img));
+    g_img = sqrt(gx_img.^2 + gy_img.^2);
+%     seg_bkg_g = g_img(:);
+%     seg_bkg_g(CC_PixelIdxList) = [];
+%     GI_bkg = mean(seg_bkg_g);
     
     % If more than 50 aggregates were found, the method likely failed. 
     % Skip this image and continue on. 
@@ -217,9 +224,20 @@ for ii=1:length(imgs_binary) % loop through provided images
             % the degree of being far from a circle (1: circle, 0: straight line)
         
         agg_grayscale = img(CC.PixelIdxList{1,jj}); % the selected agg's grayscale pixel values
-            Aggs0(jj).zbar_opt = (I_backgr - mean(agg_grayscale)) / I_backgr; % agg's optical depth metric (1: black, 0: white)
+        Aggs0(jj).zbar_opt = (I_bkg - mean(agg_grayscale)) / I_bkg; % agg's optical depth metric (1: black, 0: white)
         
+        % sharpness on the aggregate boundaries
+%         grad_agg_grayscale = g_img(CC.PixelIdxList{1,jj});
+%         Aggs0(jj).sbar_opt = mean(grad_agg_grayscale) / GI_bkg;        
         
+        SE2 = strel('disk', 2);
+        img_dilated2 = imdilate(img_binary,SE2);
+        img_eroded2 = imerode(img_binary,SE2);
+        img_edg2 = img_dilated2 - img_eroded2;
+        
+        grad_agg_edg = g_img(find(img_edg2 == 1));
+        grad_agg_int = g_img(find(img_eroded2 == 1));
+        Aggs0(jj).sbar_opt = mean(grad_agg_edg) / mean(grad_agg_int);
         
         if f_plot==1; set(groot,'CurrentFigure',f0); tools.imshow_agg(Aggs0, ii, 0); title(num2str(ii)); drawnow; end
     end
