@@ -102,7 +102,7 @@ lc = lc(ii,:); % descretize the colormap
 tt1 = nexttile(1);
 id2_im = im_ids(id_im);
 tools.imshow(Aggs(id2_im).image)
-title(tt1, 'Original TEM image', 'FontSize', 14)
+% title(tt1, 'Original TEM image', 'FontSize', 14)
 
 % image highlighting the selected aggregate and data sampling lines
 tt2 = nexttile(3);
@@ -115,7 +115,7 @@ se = strel('disk',1);
 edg_dilated = imdilate(par_edg, se);
 im2 = uint8(~edg_dilated) .* im2;
 tools.imshow(im2); % display the highlighted aggregate and the edge
-title(tt2, 'Particle selected & sampling lines', 'FontSize', 14)
+% title(tt2, 'Particle selected & sampling lines', 'FontSize', 14)
 hold on
 
 % get the nearest and furthest boundary points
@@ -186,25 +186,28 @@ for i = 1 : nr
 end
 
 % generate legend labels
-lgdtxt = {'R = 0.25 R_{b_i}', 'R = 0.5 R_{b_i}', 'R = 0.75 R_{b_i}',...
-    'R = R_{b_i}', 'R = (R_{b_i} + R_{b_o}) / 2', 'R = R_{b_o}',...
-    'R = 1.1 R_{b_o}', 'R = 1.2 R_{b_o}'}; 
-lgd = legend(lgdtxt, 'interpreter', 'tex', 'FontName', 'SansSerif',...
-    'FontSize', 11);
-lgd.Layout.Tile = 'east';
+% lgdtxt = {'R = 0.25 R_{b_i}', 'R = 0.5 R_{b_i}', 'R = 0.75 R_{b_i}',...
+%     'R = R_{b_i}', 'R = (R_{b_i} + R_{b_o}) / 2', 'R = R_{b_o}',...
+%     'R = 1.1 R_{b_o}', 'R = 1.2 R_{b_o}'}; 
+% lgd = legend(lgdtxt, 'interpreter', 'tex', 'FontName', 'Roboto Light',...
+%     'FontSize', 11, 'Orientation', 'horizontal');
+% lgd.Layout.Tile = 'south';
 hold off
 
 % plot radial intensity distribution
 tt3 = nexttile(2);
 
+set(gca, 'FontName', 'Roboto Light', 'FontSize', 12,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
+
 yyaxis left
 plot(R, I, 'LineWidth', 2);
-ylabel('Local mean intensity (-)', 'FontName', 'SansSerif', 'FontSize', 12)
+ylabel('Local mean intensity (-)', 'FontName', 'Catamaran Black', 'FontSize', 14)
 hold on
 
 yyaxis right
 plot(R, Ic, 'LineWidth', 2);
-ylabel('Cumulative mean intensity (-)', 'FontName', 'SansSerif', 'FontSize', 12)
+ylabel('Cumulative mean intensity (-)', 'FontName', 'Catamaran Black', 'FontSize', 14)
 
 y3 = ylim;
 for ii = 1 : 8
@@ -213,24 +216,25 @@ for ii = 1 : 8
 end
 
 box on
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
-    'TickLength', [0.01 0.01], 'TickDir', 'out')
-xlabel('Radial distance from COM (pix)', 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('Radial distance from COM (pix)', 'FontName', 'Catamaran Black', 'FontSize', 14)
 xlim([R(1), R(end)])
-title(tt3, 'Intensity distrubution', 'FontSize', 14)
+% title(tt3, 'Intensity distrubution', 'FontSize', 14)
 hold off
 
 % plot the gradient of radial intensity distribution
 tt4 = nexttile(4);
 
+set(gca, 'FontName', 'Roboto Light', 'FontSize', 12,...
+    'TickLength', [0.01 0.01], 'TickDir', 'out')
+
 yyaxis left
 plot(R, GI, 'LineWidth', 2);
-ylabel('Local mean intensity gradient (pix^{-1})', 'FontName', 'SansSerif', 'FontSize', 12)
+ylabel('Local mean intensity gradient (pix^{-1})', 'FontName', 'Catamaran Black', 'FontSize', 14)
 hold on
 
 yyaxis right
 plot(R, GIc, 'LineWidth', 2);
-ylabel('cumulative mean intensity gradient (pix^{-1})', 'FontName', 'SansSerif', 'FontSize', 12)
+ylabel('Cumulative mean intensity gradient (pix^{-1})', 'FontName', 'Catamaran Black', 'FontSize', 14)
 
 y4 = ylim;
 for ii = 1 : 8
@@ -239,11 +243,9 @@ for ii = 1 : 8
 end
 
 box on
-set(gca, 'FontName', 'SansSerif', 'FontSize', 11,...
-    'TickLength', [0.01 0.01], 'TickDir', 'out')
-xlabel('r (pix)', 'FontName', 'SansSerif', 'FontSize', 12)
+xlabel('Radial distance from COM (pix)', 'FontName', 'Catamaran Black', 'FontSize', 14)
 xlim([R(1), R(end)])
-title(tt4, 'Intensity gradient distrubution', 'FontSize', 14)
+% title(tt4, 'Intensity gradient distrubution', 'FontSize', 14)
 hold off
 
 
