@@ -5,10 +5,10 @@ warning('off')
 
 %% load previously saved image variables
 
-fname = '19AUG-LAL-Start_Slider.mat'; % name of the MATLAB worksapce file that has aggregate info
+fname = '20AUG-HAL-Start_Slider.mat'; % name of the MATLAB worksapce file that has aggregate info
 fdir = 'D:\HN\AUG24Onward\TEM\ATEMS_Area'; % directory to the file to be imported
 
-lbl = '_19AUG24_LAL'; % label to be added later to the end of variables
+lbl = '_20AUG24_HAL'; % label to be added later to the end of variables
 
 ii = []; % aggregate ids to be looped over for labeling (empty means all)
 
@@ -34,6 +34,14 @@ for i = ii % loop over selected aggregates that are already segmented from image
     % Loop until the user is satisfied
     while ~is_satisfied
 
+        % load images with aggregates being highlighted
+        f1 = figure;
+        j = i;
+        while isempty(Aggs(j).image)
+            j = j - 1;
+        end
+        tools.imshow_binary(Aggs(j).image, Aggs(i).binary);
+
         % get user's input for number of reandom points to be sampled
         n_samp = input('Please enter an integer for the number of random sampling points: ');
 
@@ -47,14 +55,13 @@ for i = ii % loop over selected aggregates that are already segmented from image
         % convert the point indices to row and vector locations
         [xpos1, ypos1] = ind2sub(size(Aggs(i).binary), randpnt{i});
         randpnt{i} = [xpos1, ypos1];
-
-        % load images with aggregates being highlighted
-        f1 = figure;
-        tools.imshow_binary(Aggs(i).image, Aggs(i).binary);
-
-
+        
         f2 = figure;
-        tools.imshow(Imgs(i).raw);
+        j = i;
+        while isempty(Aggs(j).image)
+            j = j - 1;
+        end        
+        tools.imshow(Imgs(j).raw);
         hold on
 
         % plot sampling points on top of binary images
