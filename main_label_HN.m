@@ -6,11 +6,11 @@ warning('off')
 %% load previously saved image variables
 
 fname = '20AUG-HAL-Start_Slider.mat'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\HN\AUG24Onward\TEM\ATEMS_Area'; % directory to the file to be imported
+fdir = 'D:\Hamed\CND\PhD\TEM\PFA_new_ET+NIT\ATEMS_Area'; % directory to the file to be imported
 
 lbl = '_20AUG24_HAL'; % label to be added later to the end of variables
 
-ii = []; % aggregate ids to be looped over for labeling (empty means all)
+ii = sort(randi(133, 10, 1)); % aggregate ids to be looped over for labeling (empty means all)
 
 fadd = cell2mat(strcat(fdir, {'\'}, fname)); % load the MATLAB workspace file
 
@@ -26,7 +26,11 @@ if ~exist('ii', 'var') || isempty(ii)
     ii = 1 : n_agg;
 end
 
-for i = ii % loop over selected aggregates that are already segmented from images
+k = 1;
+
+while k <= length(ii) % loop over selected aggregates that are already segmented from images
+    
+    i = ii(k); 
 
     % Initialize the satisfaction variable
     is_satisfied = false;
@@ -57,15 +61,11 @@ for i = ii % loop over selected aggregates that are already segmented from image
         randpnt{i} = [xpos1, ypos1];
         
         f2 = figure;
-        j = i;
-        while isempty(Aggs(j).image)
-            j = j - 1;
-        end        
-        tools.imshow(Imgs(j).raw);
+        tools.imshow(Imgs(Aggs(i).img_id).raw);
         hold on
 
         % plot sampling points on top of binary images
-        plot(ypos1, xpos1, 'r.', 'MarkerSize', 8);
+        plot(ypos1, xpos1, 'r.', 'MarkerSize', 0.5);
 
         [xpos2, ypos2] = ginput(1); % asssign points for printing aggregate id number
 
@@ -97,10 +97,11 @@ for i = ii % loop over selected aggregates that are already segmented from image
     
     exportgraphics(f2, cell2mat(strcat('morphout', {'\'}, lbl, {'\'},...
         Aggs(i).fname_out, '.tif')), 'BackgroundColor','none',...
-        'ContentType','vector')
+        'ContentType','vector', 'Resolution', 1200)
     
-    close(f1)
-    close(f2)
+    close all
+
+    k = k + 1;
     
 end
 
