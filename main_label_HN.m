@@ -5,16 +5,16 @@ warning('off')
 
 %% load previously saved image variables
 
-fname = '20AUG-HAL-Start_Slider.mat'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\Hamed\CND\PhD\TEM\PFA_new_ET+NIT\ATEMS_Area'; % directory to the file to be imported
+fname = '20AUG-LAL-Start_Slider'; % name of the MATLAB worksapce file that has aggregate info
+fdir = 'D:\HN\AUG24Onward\TEM\New\ATEMS_Area'; % directory to the file to be imported
 
-lbl = '_20AUG24_HAL'; % label to be added later to the end of variables
-
-ii = sort(randi(133, 10, 1)); % aggregate ids to be looped over for labeling (empty means all)
+lbl = '_20AUG24_LAL'; % label to be added later to the end of variables
 
 fadd = cell2mat(strcat(fdir, {'\'}, fname)); % load the MATLAB workspace file
 
 load(fadd);
+
+ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
 
 %% assign points and id labels to the aggregates in images
 
@@ -62,10 +62,11 @@ while k <= length(ii) % loop over selected aggregates that are already segmented
         
         f2 = figure;
         tools.imshow(Imgs(Aggs(i).img_id).raw);
+        truesize;  % Ensure the image is displayed at true size, without interpolation
         hold on
 
         % plot sampling points on top of binary images
-        plot(ypos1, xpos1, 'r.', 'MarkerSize', 0.5);
+        plot(ypos1, xpos1, 'r.', 'MarkerSize', 1);
 
         [xpos2, ypos2] = ginput(1); % asssign points for printing aggregate id number
 
@@ -95,9 +96,10 @@ while k <= length(ii) % loop over selected aggregates that are already segmented
         mkdir(cell2mat(strcat('morphout', {'\'}, lbl)));
     end
     
+    fprintf('Exporting...\n\n')
     exportgraphics(f2, cell2mat(strcat('morphout', {'\'}, lbl, {'\'},...
-        Aggs(i).fname_out, '.tif')), 'BackgroundColor','none',...
-        'ContentType','vector', 'Resolution', 1200)
+        Aggs(i).fname_out, '.png')), 'BackgroundColor','none',...
+        'ContentType','vector', 'Resolution', 2500)
     
     close all
 
