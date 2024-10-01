@@ -5,16 +5,16 @@ warning('off')
 
 %% load previously saved image variables
 
-fname = '20AUG-LAL-Start_Slider'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\HN\AUG24Onward\TEM\New\ATEMS_Area'; % directory to the file to be imported
+fname = '28AUG24-HAL-End-Slider'; % name of the MATLAB worksapce file that has aggregate info
+fdir = 'D:\HN\AUG24Onward\TEM\New3\ATEMS_Area'; % directory to the file to be imported
 
-lbl = '_20AUG24_LAL'; % label to be added later to the end of variables
+lbl = 'PFA_ET_NIT_28AUG24_HAL_End'; % label to be added later to the end of variables
 
-fadd = cell2mat(strcat(fdir, {'\'}, fname)); % load the MATLAB workspace file
+fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
 
 load(fadd);
 
-ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
+% ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
 
 %% assign points and id labels to the aggregates in images
 
@@ -110,7 +110,7 @@ end
 %% add test label  to the end of variables to be exported
 
 % clear redundant variables
-clear xpos1 ypos1 xpos2 ypos2 n_samp n_agg response is_satisfied
+clear i j k xpos1 ypos1 xpos2 ypos2 n_samp n_agg response is_satisfied
 
 vars = who; % call variable names
 vars(strcmp(vars,'lbl')) = []; % exclude the labeling variable
@@ -120,7 +120,7 @@ for i = 1 : length(vars)
     varname = vars{i};  % Get the name of the variable as a string
 
     % Modify the variable name by adding a suffix
-    newVarName = [varname lbl];
+    newVarName = [varname '_' lbl];
 
     % Assign the value of the original variable to the new variable
     eval([newVarName ' = ' varname ';']);  % Dynamically create a new variable
@@ -130,9 +130,9 @@ for i = 1 : length(vars)
 
 end
 
-clear vars varname newVarName
+clear i vars varname newVarName
 
-save(cell2mat(strcat('morphout', {'\'}, lbl, {'\'}, lbl, '_labeled')))
+save(cell2mat(strcat('morphout', {'\'}, lbl, {'\'}, lbl, '_vars.mat')))
 
 
 
