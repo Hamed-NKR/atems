@@ -51,7 +51,7 @@ for i = 1 : n_agg
 
     if (i == n_agg) || (Aggs(i).img_id ~= Aggs(i+1).img_id)
         fprintf('Number of aggregates in images is: %d\n', n_agg_i);
-        figure(f2)
+        f2 = figure;
         subplot(1,2,1)
         tools.imshow(imgs(Aggs(i).img_id));
         subplot(1,2,2)
