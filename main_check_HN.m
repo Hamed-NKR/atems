@@ -3,18 +3,20 @@ clear
 close all
 warning('off')
 
-fname_wsp = '28AUG24_HAL_End_Slider';
-fdir_wsp = 'D:\HN\AUG24Onward\TEM\New3\ATEMS_Area';
+fname_wsp = '19AUG24-LAL-End-Slider';
+fdir_wsp = 'D:\HN\AUG24Onward\TEM\New4\01OCT24\ATEMS_Area';
 
 fadd = cell2mat(strcat(fdir_wsp, {'\'}, fname_wsp, '.mat'));
 
 load(fadd)
 
+if ~exist('Aggs', 'var') || isempty(Aggs)
+    Aggs = morph.analyze_binary_HN(imgs_binary, pixsizes, imgs, fname);
+end
+
 n_agg = length(Aggs);
 
 ii = [];
-
-imgs_binary_new = imgs_binary;
 
 for i = 1 : n_agg
 
@@ -32,13 +34,13 @@ for i = 1 : n_agg
 
     % Prompt user for feedback on segmentation
     f1 = figure;
-    tools.imshow_binary(Aggs(j).image, Aggs(i).binary)
+    tools.imshow_binary(Aggs(Aggs(i).img_id).image, Aggs(i).binary);
     title(sprintf('Image ID: %d, Aggregate ID: %d', Aggs(i).img_id, Aggs(i).id))
     response1 = input('Are you satisfied with the binary image? (y/n): ', 's');
 
     if strcmpi(response1, 'n') || strcmpi(response1, 'N')
         ii = [ii, i];
-        imgs_binary_new(Aggs(i).img_id) = agg.seg_slider(imgs(Aggs(i).img_id),...
+        imgs_binary(Aggs(i).img_id) = agg.seg_slider(imgs(Aggs(i).img_id),...
             imgs_binary(Aggs(i).img_id));
 
     elseif ~(strcmpi(response1, 'y') || strcmpi(response1, 'Y'))
@@ -47,35 +49,33 @@ for i = 1 : n_agg
 
     end
 
-    f2 = figure;
-    tools.imshow(Aggs(j).image)
-    response2 = input('How many sub-aggregates exist in this aggregate?', 's');
-    response2 = int8(str2num(response2));
-    if response2 < 0; response2 = 0; end
-    Aggs(i).n_subagg = response2;
-
     if (i == n_agg) || (Aggs(i).img_id ~= Aggs(i+1).img_id)
         fprintf('Number of aggregates in images is: %d\n', n_agg_i);
-        figure(f1)
-        response3 = input('Confirm? (y/n): ', 's');
+        figure(f2)
+        subplot(1,2,1)
+        tools.imshow(imgs(Aggs(i).img_id));
+        subplot(1,2,2)
+        tools.imshow_binary(imgs(Aggs(i).img_id), imgs_binary(Aggs(i).img_id))
+        response2 = input('Confirm? (y/n): ', 's');
     else
-        response3 = 'y';
+        response2 = 'y';
     end
 
     chk = true;
     while (chk)
-        if strcmpi(response3, 'n') || strcmpi(response3, 'N')
+        if strcmpi(response2, 'n') || strcmpi(response2, 'N')
+            ii = [ii, i];
             imgs_binary_new(Aggs(i).image_id) = agg.seg_slider(imgs(Aggs(i).image_id),...
                 imgs_binary(Aggs(i).image_id));
 
             chk = false;
 
-        elseif strcmpi(response3, 'y') || strcmpi(response3, 'Y')
+        elseif strcmpi(response2, 'y') || strcmpi(response2, 'Y')
             chk = false;
 
         else
             warning('Invalid resposne! Try again...')
-            response3 = input('Confirm now? (y/n): ', 's');
+            response2 = input('Confirm now? (y/n): ', 's');
 
         end
     end
@@ -85,6 +85,31 @@ for i = 1 : n_agg
 
 end
 
-Aggs_new = morph.analyze_binary_HN(imgs_binary_new, pixsizes, imgs, fname);
+if ~isempty(ii)
+    Aggs = morph.analyze_binary_HN(imgs_binary, pixsizes, imgs, fname);
+    n_agg = length(Aggs);
+end
 
+for i = 1 : n_agg
+
+    f3 = figure;
+    title(sprintf('Image ID: %d, Aggregate ID: %d', Aggs(i).img_id, Aggs(i).id))
+    subplot(1,2,1)
+    tools.imshow(imgs(Aggs(i).img_id));
+    subplot(1,2,2)
+    tools.imshow_binary(imgs(Aggs(i).img_id), imgs_binary(Aggs(i).img_id))
+
+    response3 = input('How many sub-aggregates exist in this aggregate? ', 's');
+    response3 = str2double(response3);
+
+    if isempty(response3) || isnan(response3) ||...
+            (round(response3) ~= response3) || response3 < 0
+        warning('Invalid resposne! Try again...')
+        response3 = input('How many sub-aggregates exist in this aggregate? ', 's');
+    else
+        response3 = int8(response3);
+        Aggs(i).n_subagg = response3;
+    end
+
+end
 
