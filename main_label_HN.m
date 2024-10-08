@@ -1,32 +1,33 @@
-clc
-clear
-close all
-warning('off')
-
-%% load previously saved image variables
-
-fname = '20AUG24-LAL-End-Slider'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\HN\AUG24Onward\TEM\New4\01OCT24\ATEMS_Area'; % directory to the file to be imported
-
-lbl = 'PFA_ET+NIT_28AUG24_HAL_End'; % label to be added later to the end of variables
-
-fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
-
-load(fadd);
-
-% ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
-
-%% assign points and id labels to the aggregates in images
-
-n_agg = length(Aggs); % number of aggregates
-randpnt = cell(n_agg,1); % initialize placeholder for random sampling points
-fname_out = cell(n_agg,1); % address to the output images
-
-if ~exist('ii', 'var') || isempty(ii)
-    ii = 1 : n_agg;
-end
-
-k = 1;
+% clc
+% clear
+% close all
+% warning('off')
+% 
+% %% load previously saved image variables
+% 
+% fname = '19AUG24_LAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
+% fdir = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-3pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area'; % directory to the file to be imported
+% 
+% lbl = 'PFA_ET+NIT_19AUG24_LAL_End'; % label to be added later to the end of variables
+% 
+% fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
+% 
+% load(fadd);
+% 
+% % ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
+% 
+% %% assign points and id labels to the aggregates in images
+% 
+% n_agg = length(Aggs); % number of aggregates
+% randpnt = cell(n_agg,1); % initialize placeholder for random sampling points
+% fname_out = cell(n_agg,1); % address to the output images
+% im_rsl = 2500; % resolution for image to be exported
+% 
+% if ~exist('ii', 'var') || isempty(ii)
+%     ii = 1 : n_agg;
+% end
+% 
+% k = 1;
 
 while k <= length(ii) % loop over selected aggregates that are already segmented from images
     
@@ -97,11 +98,21 @@ while k <= length(ii) % loop over selected aggregates that are already segmented
     end
     
     fprintf('Exporting...\n\n')
-    exportgraphics(f2, cell2mat(strcat('morphout', {'\'}, lbl, {'\'},...
-        Aggs(i).fname_out, '.png')), 'BackgroundColor','none',...
-        'ContentType','vector', 'Resolution', 2500)
     
+    is_export = false;
+    while ~is_export
+        try
+            exportgraphics(f2, cell2mat(strcat('morphout', {'\'}, lbl, {'\'},...
+                Aggs(i).fname_out, '.png')), 'BackgroundColor','none',...
+                'ContentType','vector', 'Resolution', im_rsl)
+            is_export = true;
+        catch
+            im_rsl = im_rsl - 100;
+        end
+    end
+
     close all
+    im_rsl = 2500;
 
     k = k + 1;
     
@@ -111,6 +122,8 @@ end
 
 % clear redundant variables
 clear i j k xpos1 ypos1 xpos2 ypos2 n_samp n_agg response is_satisfied
+
+lbl_save = lbl;
 
 vars = who; % call variable names
 vars(strcmp(vars,'lbl')) = []; % exclude the labeling variable
