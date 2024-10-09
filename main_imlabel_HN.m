@@ -1,33 +1,33 @@
-% clc
-% clear
-% close all
-% warning('off')
-% 
-% %% load previously saved image variables
-% 
-% fname = '19AUG24_LAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
-% fdir = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-3pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area'; % directory to the file to be imported
-% 
-% lbl = 'PFA_ET+NIT_19AUG24_LAL_End'; % label to be added later to the end of variables
-% 
-% fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
-% 
-% load(fadd);
-% 
-% % ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
-% 
-% %% assign points and id labels to the aggregates in images
-% 
-% n_agg = length(Aggs); % number of aggregates
-% randpnt = cell(n_agg,1); % initialize placeholder for random sampling points
-% fname_out = cell(n_agg,1); % address to the output images
-% im_rsl = 2500; % resolution for image to be exported
-% 
-% if ~exist('ii', 'var') || isempty(ii)
-%     ii = 1 : n_agg;
-% end
-% 
-% k = 1;
+clc
+clear
+close all
+warning('off')
+
+%% load previously saved image variables
+
+fname = '19AUG24_LAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
+fdir = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-3pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area'; % directory to the file to be imported
+
+lbl = 'PFA_ET+NIT_19AUG24_LAL_End'; % label to be added later to the end of variables
+
+fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
+
+load(fadd);
+
+% ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
+
+%% assign points and id labels to the aggregates in images
+
+n_agg = length(Aggs); % number of aggregates
+randpnt = cell(n_agg,1); % initialize placeholder for random sampling points
+fname_out = cell(n_agg,1); % address to the output images
+im_rsl = 2500; % resolution for image to be exported
+
+if ~exist('ii', 'var') || isempty(ii)
+    ii = 1 : n_agg;
+end
+
+k = 1;
 
 while k <= length(ii) % loop over selected aggregates that are already segmented from images
     
