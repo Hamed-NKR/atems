@@ -20,9 +20,13 @@ hold on
 %% "low" agglomeration level data - Repeat 1 %%
 
 % load files for the aggregate segmentation data
+
 fname_agg_lal_1 = '19AUG24_LAL_End_Slider.mat';
-fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
+fdir_agg_lal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-0830pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
+fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
+fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
 id_agg_lal_1 = [39, 42, 44, 56, 57, 59, 58, 62, 63, 64];
+
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1));
 load(fadd_agg_lal_1);
 
@@ -48,15 +52,8 @@ end
 clear vars varname newVarName
 
 % information on primary particle manual sizing data
-fname_pp_lal_1 = {'PFA_ET+NIT_LAL_19AUG24_End_034', 'PFA_ET+NIT_LAL_19AUG24_End_037',...
-    'PFA_ET+NIT_LAL_19AUG24_End_039', 'PFA_ET+NIT_LAL_19AUG24_End_051_S',...
-    'PFA_ET+NIT_LAL_19AUG24_End_051_L', 'PFA_ET+NIT_LAL_19AUG24_End_052_S',...
-    'PFA_ET+NIT_LAL_19AUG24_End_052_L', 'PFA_ET+NIT_LAL_19AUG24_End_055',...
-    'PFA_ET+NIT_LAL_19AUG24_End_056', 'PFA_ET+NIT_LAL_19AUG24_End_057'};
-fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
 
 n_agg_lal_1 = length(id_agg_lal_1);
-
 dpp_manu_lal_1 = cell(n_agg_lal_1, 1);
 dbarpp_manu_lal_1 = zeros(n_agg_lal_1, 1);
 sigmapp_manu_lal_1 = zeros(n_agg_lal_1, 1);
@@ -66,8 +63,9 @@ fadd_pp_lal_1 = cell(n_agg_lal_1, 1);
 
 figure(f1)
 for i = 1 : n_agg_lal_1
-
-    fadd_pp_lal_1{i} = char(strcat(fdir_pp_lal_1, {'\'}, fname_pp_lal_1{i}, '.csv'));
+    
+    fadd_pp_lal_1{i} = char(strcat(fdir_pp_lal_1, {'\'}, fname_pp_lal_1,...
+        '_', id_agg_lal_1(i), '.csv'));
 
     if isfile(fadd_pp_lal_1{i})
 
@@ -93,8 +91,11 @@ end
 
 % load files for the aggregate segmentation data
 fname_agg_hal_1 = '28AUG24_HAL_End_Slider.mat';
-fdir_agg_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
+fdir_agg_hal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-0830pm\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
+fname_pp_hal_1 = 'PFA_ET+NIT_28AUG24_HAL_End';
+fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
 id_agg_hal_1 = 1:10;
+
 fadd_agg_hal_1 = cell2mat(strcat(fdir_agg_hal_1, {'\'}, fname_agg_hal_1));
 load(fadd_agg_hal_1);
 
@@ -120,12 +121,6 @@ end
 clear vars varname newVarName
 
 % information on primary particle manual sizing data
-fname_pp_hal_1 = {'PFA_ET+NIT_28AUG24_HAL_End_1', 'PFA_ET+NIT_28AUG24_HAL_End_2',...
-    'PFA_ET+NIT_28AUG24_HAL_End_3', 'PFA_ET+NIT_28AUG24_HAL_End_4',...
-    'PFA_ET+NIT_28AUG24_HAL_End_5', 'PFA_ET+NIT_28AUG24_HAL_End_6',...
-    'PFA_ET+NIT_28AUG24_HAL_End_7', 'PFA_ET+NIT_28AUG24_HAL_End_8',...
-    'PFA_ET+NIT_28AUG24_HAL_End_9', 'PFA_ET+NIT_28AUG24_HAL_End_10'};
-fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
 
 n_agg_hal_1 = length(id_agg_hal_1);
 
@@ -138,7 +133,8 @@ fadd_pp_hal_1 = cell(n_agg_hal_1, 1);
 
 for i = 1 : n_agg_hal_1
 
-    fadd_pp_hal_1{i} = char(strcat(fdir_pp_hal_1, {'\'}, fname_pp_hal_1{i}, '.csv'));
+    fadd_pp_hal_1{i} = char(strcat(fdir_pp_hal_1, {'\'}, fname_pp_hal_1,...
+        '_', id_agg_hal_1(i), '.csv'));
 
     if isfile(fadd_pp_hal_1{i})
 
