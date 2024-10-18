@@ -6,7 +6,7 @@ warning('off')
 %% initialize dpp vs. da figure %%
 
 f1 = figure;
-f1.Position = [100, 100, 750, 500];
+f1.Position = [50, 50, 500, 600];
 set(f1, 'color', 'white');
 
 % plot universal correlation
@@ -25,7 +25,7 @@ fname_agg_lal_1 = '19AUG24_LAL_End_Slider';
 fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
 fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
-id_agg_lal_1 = [39, 42, 44, 56, 57, 59, 58, 62, 63, 64];
+id_agg_lal_1 = [1:7, 12, 39, 42, 44, 55, 56, 57, 58, 59, 60, 62, 63, 64];
 
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1, '.mat'));
 load(fadd_agg_lal_1);
@@ -94,7 +94,7 @@ fname_agg_hal_1 = '28AUG24_HAL_End_Slider';
 fdir_agg_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
 fname_pp_hal_1 = 'PFA_ET+NIT_28AUG24_HAL_End';
 fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
-id_agg_hal_1 = 1:10;
+id_agg_hal_1 = 1:21;
 
 fadd_agg_hal_1 = cell2mat(strcat(fdir_agg_hal_1, {'\'}, fname_agg_hal_1, '.mat'));
 load(fadd_agg_hal_1);
@@ -158,17 +158,17 @@ for i = 1 : n_agg_hal_1
 end
 
 % plot configs in dpp vs da figure
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 12,...
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([10,1500])
-ylim([5,50])
+xlim([20,1000])
+ylim([10,40])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
-legend(cat(2, plt_0, plt_lal_1, plt_hal_1),...
-    cat(2, {'Olfert and Rogak (2019)'},...
-    {'Low agglom.'}, {'High agglom.'}),...
-    'interpreter', 'latex', 'FontSize', 14, 'location', 'northeastoutside')
+legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
+    cat(2, {'Low agglom.'}, {'High agglom.'}, {'Olfert and Rogak (2019)'}),...
+    'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside',...
+    'Orientation', 'horizontal', 'NumColumns', 2)
 
 
 %% da comparison subplot %%
@@ -181,7 +181,8 @@ set(f2, 'color', 'white');
 tt = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 nexttile
 
-n_aggs_tot = [size(Aggs_lal_1, 2), size(Aggs_hal_1, 2)];
+n_aggs_tot = [size(Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0), 2),...
+    size(Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0), 2)];
 
 xlbl21 = [strcat('Low agglom. (n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
     strcat('High agglom. (n =', {' '}, num2str(n_aggs_tot(2)), ')')];
@@ -189,7 +190,9 @@ xlbl21 = [strcat('Low agglom. (n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
 condition21 = categorical([repmat(xlbl21(1), n_aggs_tot(1), 1);...
     repmat(xlbl21(2), n_aggs_tot(2), 1)]);
 
-boxplot([cat(1, Aggs_lal_1.da); cat(1, Aggs_hal_1.da)], condition21, 'Notch', 'on')
+boxplot([cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da);...
+    cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da)],...
+    condition21, 'Notch', 'on')
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'YScale', 'log')
@@ -252,7 +255,7 @@ ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 
 % initialize figure 3
 f3 = figure;
-f3.Position = [100, 100, 500, 400];
+f3.Position = [150, 150, 500, 400];
 set(f3, 'color', 'white');
 
 n_subagg = {cat(1,Aggs_lal_1.n_subagg), cat(1,Aggs_hal_1.n_subagg)};
