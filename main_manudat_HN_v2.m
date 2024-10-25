@@ -22,10 +22,10 @@ hold on
 % load files for the aggregate segmentation data
 
 fname_agg_lal_1 = '19AUG24_LAL_End_Slider';
-fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
+fdir_agg_lal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
-fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
-id_agg_lal_1 = [1:7, 12, 39, 42, 44, 55, 56, 57, 58, 59, 60, 62, 63, 64];
+fdir_pp_lal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
+id_agg_lal_1 = [1:17, 39, 42, 44, 55:64];
 
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1, '.mat'));
 load(fadd_agg_lal_1);
@@ -91,10 +91,10 @@ end
 
 % load files for the aggregate segmentation data
 fname_agg_hal_1 = '28AUG24_HAL_End_Slider';
-fdir_agg_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
+fdir_agg_hal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
 fname_pp_hal_1 = 'PFA_ET+NIT_28AUG24_HAL_End';
-fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
-id_agg_hal_1 = 1:21;
+fdir_pp_hal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
+id_agg_hal_1 = 1:30;
 
 fadd_agg_hal_1 = cell2mat(strcat(fdir_agg_hal_1, {'\'}, fname_agg_hal_1, '.mat'));
 load(fadd_agg_hal_1);
@@ -165,10 +165,14 @@ ylim([10,40])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
+% number of aggregates to be manually sized
+n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
+
 legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
-    cat(2, {'Low agglom.'}, {'High agglom.'}, {'Olfert and Rogak (2019)'}),...
-    'interpreter', 'latex', 'FontSize', 11, 'location', 'southoutside',...
-    'Orientation', 'horizontal', 'NumColumns', 2)
+    cat(2, strcat('Low agglom. (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
+    strcat('High agglom. (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
+    {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 11,...
+    'location', 'southoutside', 'Orientation', 'horizontal', 'NumColumns', 2)
 
 
 %% da comparison subplot %%
@@ -224,8 +228,6 @@ ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 %% avereage dpp within aggregates comparison subplot %%
 
 nexttile
-
-n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
 
 xlbl23 = [strcat('Low agglom. (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
     strcat('High agglom. (n =', {' '}, num2str(n_aggs_manu(2)), ')')];
@@ -291,5 +293,5 @@ ylabel('Frequency [$\%$]', 'interpreter', 'latex', 'FontSize', 14)
 lgd3 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
     '$3 \le n_\mathrm{hyb} \le 5$', '$n_\mathrm{hyb} > 5$'},...
     'interpreter', 'latex', 'FontSize', 11, 'location', 'northoutside',...
-    'orientation', 'horizontal', 'NumColumns', 2);
+    'orientation', 'horizontal', 'NumColumns', 4);
 lgd3.ItemTokenSize = [10, 10];
