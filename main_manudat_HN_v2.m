@@ -22,10 +22,10 @@ hold on
 % load files for the aggregate segmentation data
 
 fname_agg_lal_1 = '19AUG24_LAL_End_Slider';
-fdir_agg_lal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
+fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
-fdir_pp_lal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
-id_agg_lal_1 = [1:17, 39, 42, 44, 55:64];
+fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
+id_agg_lal_1 = [1:27, 39, 42, 44, 55:64];
 
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1, '.mat'));
 load(fadd_agg_lal_1);
@@ -91,9 +91,9 @@ end
 
 % load files for the aggregate segmentation data
 fname_agg_hal_1 = '28AUG24_HAL_End_Slider';
-fdir_agg_hal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
+fdir_agg_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
 fname_pp_hal_1 = 'PFA_ET+NIT_28AUG24_HAL_End';
-fdir_pp_hal_1 = 'D:\HN\AUG24Onward\TEM\SimMag-22OCT24-10pm\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
+fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
 id_agg_hal_1 = 1:30;
 
 fadd_agg_hal_1 = cell2mat(strcat(fdir_agg_hal_1, {'\'}, fname_agg_hal_1, '.mat'));
@@ -253,7 +253,7 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
 xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 
-%% n_hyb comparison subplot %%
+%% n_hyb freqeuncy comparison subplot %%
 
 % initialize figure 3
 f3 = figure;
@@ -295,3 +295,50 @@ lgd3 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
     'interpreter', 'latex', 'FontSize', 11, 'location', 'northoutside',...
     'orientation', 'horizontal', 'NumColumns', 4);
 lgd3.ItemTokenSize = [10, 10];
+
+%% dpp vs. da as a function of n_hyb, not experimental case %%
+
+% initialize figure 4
+f4 = figure;
+f4.Position = [200, 200, 1200, 900];
+set(f4, 'color', 'white')
+
+plt4 = cell(5,1); % initialize dpp vs da plots per n_hyb
+
+n_subagg_tot = cat(1, n_subagg{:}); % compile number of subaggregates
+dbarpp_tot = [dbarpp_manu_lal_1; dbarpp_manu_hal_1]; % compile mean primary particle sizes
+dbarpp_tot(n_subagg{1} < 1) = [];
+da_tot = [cat(1, Aggs_lal_1.da); cat(1, Aggs_hal_1.da)]; % compile projected-area sizes
+
+plt4{1} = copyobj(plt_0, f4.CurrentAxes);
+
+plt4{2} = scatter(da_tot(n_subagg_tot == 1), dbarpp_tot(n_subagg_tot == 1),...
+    15, hex2rgb(clr3(1,:)), '^');
+hold on
+
+plt4{3} = scatter(da_tot(n_subagg_tot == 2), dbarpp_tot(n_subagg_tot == 2),...
+    15, hex2rgb(clr3(2,:)), 's');
+
+plt4{4} = scatter(da_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)),...
+    dbarpp_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)), 15,...
+    hex2rgb(clr3(3,:)), 'h');
+
+plt4{5} = scatter(da_tot(n_subagg_tot > 5), dbarpp_tot(n_subagg_tot > 5),...
+    15, hex2rgb(clr3(4,:)), 'o');
+
+% plot configs
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+xlim([20,1000])
+ylim([10,40])
+xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+
+% number of aggregates to be manually sized
+n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
+
+legend(cat(2, plt4{:}),...
+    {'Olfert and Rogak (2019)', '$n_\mathrm{hyb} = 1$',...
+    '$n_\mathrm{hyb} = 2$', '$3 \le n_\mathrm{hyb} \le 5$',...
+    '$n_\mathrm{hyb} > 5$'}, 'interpreter', 'latex', 'FontSize', 11,...
+    'location', 'eastoutside')
