@@ -532,3 +532,23 @@ legend(cat(2, plt4{:}),...
     '$n_\mathrm{hyb} = 2$', '$3 \le n_\mathrm{hyb} \le 5$',...
     '$n_\mathrm{hyb} > 5$'}, 'interpreter', 'latex', 'FontSize', 11,...
     'location', 'northwest')
+
+%% outputs for Langevin dynamics modeling
+
+% geometric mean and standard deviation of aggregate projected area size...
+    % ...for uniform-looking low-agglomeration aggregates
+da_uni = cat(1, Aggs_lal_1.da);
+da_uni(cat(1,Aggs_lal_1.n_subagg) ~= 1) = [];
+GM_da_uni = geomean(da_uni);
+GSD_da_uni = morph.geostd(da_uni);
+
+% find indices of aggregate with uniform structure
+ii0_agg_uni = find(cat(1,Aggs_lal_1.n_subagg) == 1);
+[ii_agg_uni, ii_pp_uni] = intersect(id_agg_lal_1, ii0_agg_uni);
+
+% geometric mean and standard deviation of geometric mean of primary...
+    % ...particle diamter within individual aggregates (GM and GSD of mean)
+dpp_uni = dbarpp_manu_lal_1(ii_pp_uni);
+GM_dpp_uni = geomean(dpp_uni);
+GSD_dpp_uni = morph.geostd(dpp_uni);
+
