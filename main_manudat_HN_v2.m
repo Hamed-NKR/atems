@@ -224,9 +224,9 @@ hold on
 
 % Compute kernel density estimate for each condition
 [f_da_lal_1, xi_da_lal_1] =...
-    ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da));
+    ksdensity(log10(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)));
 [f_da_hal_1, xi_da_hal_1] =...
-    ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da));
+    ksdensity(log10(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da)));
 
 % to avoid issue with log scale in y axis
 f_da_lal_1(xi_da_lal_1 <= 0) = [];
@@ -234,18 +234,18 @@ xi_da_lal_1(xi_da_lal_1 <= 0) = [];
 f_da_hal_1(xi_da_hal_1 <= 0) = [];
 xi_da_hal_1(xi_da_hal_1 <= 0) = [];
 
-scale21 = -30;
+scale21 = -0.1;
 
-plot(scale21 * f_da_lal_1 + 0.7, xi_da_lal_1, 'Color', hex2rgb('#8D493A'),...
+plot(scale21 * f_da_lal_1 + 0.7, 10.^xi_da_lal_1, 'Color', hex2rgb('#8D493A'),...
     'LineWidth', 1.25)
 fill([scale21 * f_da_lal_1 + 0.7, 0.7 * ones(size(f_da_lal_1))],...
-     [xi_da_lal_1, fliplr(xi_da_lal_1)], hex2rgb('#DC8686'),...
+     [10.^xi_da_lal_1, fliplr(10.^xi_da_lal_1)], hex2rgb('#DC8686'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-plot(scale21 * f_da_hal_1 + 1.7, xi_da_hal_1, 'Color', hex2rgb('#537188'),...
+plot(scale21 * f_da_hal_1 + 1.7, 10.^xi_da_hal_1, 'Color', hex2rgb('#537188'),...
     'LineWidth', 1.25)
 fill([scale21 * f_da_hal_1 + 1.7, 1.7 * ones(size(f_da_hal_1))],...
-     [xi_da_hal_1, fliplr(xi_da_hal_1)], hex2rgb('#7EACB5'),...
+     [10.^xi_da_hal_1, fliplr(10.^xi_da_hal_1)], hex2rgb('#7EACB5'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
@@ -254,7 +254,7 @@ xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 2.7])
 ylabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 2.7])
-ylim([10, 700])
+ylim([20, 1000])
 
 
 %% ensemble dpp comparison subplot %%
@@ -277,10 +277,10 @@ bp22 = boxplot([dpp_ens_lal_1; dpp_ens_hal_1], condition22, 'Notch','on',...
     'Symbol', 'o', 'Widths', 0.25);
 
 boxes22 = findobj(bp22, 'Tag', 'Box');
-patch(get(boxes22(1), 'XData'), get(boxes22(1), 'YData'), hex2rgb('#DC8686'),...
-    'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
-patch(get(boxes22(2), 'XData'), get(boxes22(2), 'YData'), hex2rgb('#7EACB5'),...
-    'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes22(1), 'XData'), get(boxes22(1), 'YData'),...
+    hex2rgb('#DC8686'), 'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
+patch(get(boxes22(2), 'XData'), get(boxes22(2), 'YData'),...
+    hex2rgb('#7EACB5'), 'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
 
 medians22 = findobj(bp22, 'Tag', 'Median');
 set(medians22(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
@@ -300,8 +300,8 @@ set(lowwhisker22, 'linestyle', '-');
 hold on
 
 % Compute kernel density estimate for each condition
-[f_dpp_lal_1, xi_dpp_lal_1] = ksdensity(dpp_ens_lal_1);
-[f_dpp_hal_1, xi_dpp_hal_1] = ksdensity(dpp_ens_hal_1);
+[f_dpp_lal_1, xi_dpp_lal_1] = ksdensity(log10(dpp_ens_lal_1));
+[f_dpp_hal_1, xi_dpp_hal_1] = ksdensity(log10(dpp_ens_hal_1));
 
 % to avoid issue with log scale in y axis
 f_dpp_lal_1(xi_dpp_lal_1 <= 0) = [];
@@ -309,18 +309,18 @@ xi_dpp_lal_1(xi_dpp_lal_1 <= 0) = [];
 f_dpp_hal_1(xi_dpp_hal_1 <= 0) = [];
 xi_dpp_hal_1(xi_dpp_hal_1 <= 0) = [];
 
-scale22 = -4;
+scale22 = -0.1;
 
-plot(scale22 * f_dpp_lal_1 + 0.7, xi_dpp_lal_1, 'Color', hex2rgb('#8D493A'),...
-    'LineWidth', 1.25)
+plot(scale22 * f_dpp_lal_1 + 0.7, 10.^xi_dpp_lal_1, 'Color',...
+    hex2rgb('#8D493A'), 'LineWidth', 1.25)
 fill([scale22 * f_dpp_lal_1 + 0.7, 0.7 * ones(size(f_dpp_lal_1))],...
-     [xi_dpp_lal_1, fliplr(xi_dpp_lal_1)], hex2rgb('#DC8686'),...
+     [10.^xi_dpp_lal_1, fliplr(10.^xi_dpp_lal_1)], hex2rgb('#DC8686'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-plot(scale22 * f_dpp_hal_1 + 1.7, xi_dpp_hal_1, 'Color', hex2rgb('#537188'),...
-    'LineWidth', 1.25)
+plot(scale22 * f_dpp_hal_1 + 1.7, 10.^xi_dpp_hal_1, 'Color',...
+    hex2rgb('#537188'), 'LineWidth', 1.25)
 fill([scale22 * f_dpp_hal_1 + 1.7, 1.7 * ones(size(f_dpp_hal_1))],...
-     [xi_dpp_hal_1, fliplr(xi_dpp_hal_1)], hex2rgb('#7EACB5'),...
+     [10.^xi_dpp_hal_1, fliplr(10.^xi_dpp_hal_1)], hex2rgb('#7EACB5'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
