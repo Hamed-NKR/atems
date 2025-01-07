@@ -94,7 +94,7 @@ fname_agg_hal_1 = '28AUG24_HAL_End_Slider';
 fdir_agg_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area';
 fname_pp_hal_1 = 'PFA_ET+NIT_28AUG24_HAL_End';
 fdir_pp_hal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ImageJ_Primaries\CSV';
-id_agg_hal_1 = 1:30;
+id_agg_hal_1 = 1:40;
 
 fadd_agg_hal_1 = cell2mat(strcat(fdir_agg_hal_1, {'\'}, fname_agg_hal_1, '.mat'));
 load(fadd_agg_hal_1);
@@ -179,10 +179,10 @@ legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
 
 % initialize figure 2
 f2 = figure;
-f2.Position = [100, 100, 1800, 450];
+f2.Position = [100, 100, 900, 900];
 set(f2, 'color', 'white');
 
-tt = tiledlayout(1, 4, 'Padding', 'compact', 'TileSpacing', 'compact');
+tt = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 nexttile
 
 n_aggs_tot = [size(Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0), 2),...
@@ -250,7 +250,6 @@ fill([scale21 * f_da_hal_1 + 1.7, 1.7 * ones(size(f_da_hal_1))],...
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
     'TickLength', [0.02 0.02], 'YScale', 'log')
-xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 2.7])
 ylabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 2.7])
@@ -325,7 +324,6 @@ fill([scale22 * f_dpp_hal_1 + 1.7, 1.7 * ones(size(f_dpp_hal_1))],...
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
     'TickLength', [0.02 0.02], 'YScale', 'log')
-xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 2.7])
 ylim([3, 80])
@@ -379,7 +377,6 @@ legend(plt23_ens, '$\langle{d_\mathrm{pp}}\rangle$ (Ensemble GM)',...
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
     'TickLength', [0.02 0.02], 'XDir', 'reverse')
-xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylim([11.5, 29.5])
 
@@ -428,7 +425,6 @@ legend(plt24_ens, '$\gamma_\mathrm{pp}$ (Ensemble GSD)', 'interpreter',...
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
     'TickLength', [0.02 0.02], 'YScale', 'log', 'XDir', 'reverse')
-xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 yticks([1.2 1.3 1.4 1.5 1.6])
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 ylim([1.15, 1.65])
@@ -509,7 +505,7 @@ plt4{3} = scatter(da_tot(n_subagg_tot == 2), dbarpp_tot(n_subagg_tot == 2),...
     15, clr3(2,:), 's');
 
 plt4{4} = scatter(da_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)),...
-    dbarpp_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)), 15,...
+    dbarpp_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)), 25,...
     clr3(3,:), 'h');
 
 plt4{5} = scatter(da_tot(n_subagg_tot > 5), dbarpp_tot(n_subagg_tot > 5),...
