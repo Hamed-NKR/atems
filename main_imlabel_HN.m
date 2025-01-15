@@ -5,10 +5,10 @@ warning('off')
 
 %% load previously saved image variables
 
-fname = '19AUG24_LAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\HN\AUG24Onward\TEM\SimMag-07OCT-24-3pm\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area'; % directory to the file to be imported
+fname = '28AUG24_HAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
+fdir = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area'; % directory to the file to be imported
 
-lbl = 'PFA_ET+NIT_19AUG24_LAL_End'; % label to be added later to the end of variables
+lbl = 'PFA_ET+NIT_28AUG24_HAL_End'; % label to be added later to the end of variables
 
 fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace file
 

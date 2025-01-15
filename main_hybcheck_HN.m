@@ -3,8 +3,8 @@ clear
 close all
 warning('off')
 
-fname_wsp = '19AUG24-LAL-End-Slider';
-fdir_wsp = 'D:\HN\AUG24Onward\TEM\New4\01OCT24\ATEMS_Area';
+fname_wsp = '19AUG24_LAL_End_Slider';
+fdir_wsp = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 
 fadd = cell2mat(strcat(fdir_wsp, {'\'}, fname_wsp, '.mat'));
 
@@ -29,17 +29,30 @@ for i = 1 : n_agg
     title('Aggregate selected')
     sgtitle(sprintf('Image ID: %d, Aggregate ID: %d', Aggs(i).img_id, Aggs(i).id))
 
-    response = input('How many sub-aggregates exist in this aggregate? ', 's');
-    response = str2double(response);
+    response1 = input('How many sub-aggregates exist in this aggregate? ', 's');
+    response1 = str2double(response1);
 
-    if isempty(response) || isnan(response) ||...
-            (round(response) ~= response) || response < 0
+    if isempty(response1) || isnan(response1) ||...
+            (round(response1) ~= response1) || response1 < 0
         warning('Invalid resposne! Try again...')
-        response = input('How many sub-aggregates exist in this aggregate? ', 's');
+        response1 = input('How many sub-aggregates exist in this aggregate? ', 's');
     else
-        response = int8(response);
-        Aggs(i).n_subagg = response;
+        response1 = int8(response1);
+        Aggs(i).n_subagg = response1;
     end
+
+    response2 = input('How many sub-aggregates are collapsed in this aggregate? ', 's');
+    response2 = str2double(response2);
+
+    if isempty(response2) || isnan(response2) ||...
+            (round(response2) ~= response2) || response2 < 0
+        warning('Invalid resposne! Try again...')
+        response2 = input('How many sub-aggregates are collapsed in this aggregate? ', 's');
+    else
+        response2 = int8(response2);
+        Aggs(i).n_colaps = response2;
+    end
+
     close(f)
 
 end

@@ -6,7 +6,7 @@ warning('off')
 %% initialize dpp vs. da figure %%
 
 f1 = figure;
-f1.Position = [50, 50, 600, 600];
+f1.Position = [50, 50, 550, 600];
 set(f1, 'color', 'white');
 
 % plot universal correlation
@@ -25,7 +25,7 @@ fname_agg_lal_1 = '19AUG24_LAL_End_Slider';
 fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
 fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
-id_agg_lal_1 = [1:27, 39, 42, 44, 55:64];
+id_agg_lal_1 = [1:27, 39, 42, 44:64];
 
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1, '.mat'));
 load(fadd_agg_lal_1);
@@ -79,8 +79,9 @@ for i = 1 : n_agg_lal_1
         sigmapp_manu_lal_1(i) = morph.geostd(dpp_manu_lal_1{i});
         npp_manu_lal_1(i) = length(dpp_manu_lal_1{i});
         
-        plt_lal_1 = scatter(Aggs_lal_1(id_agg_lal_1(i)).da, dbarpp_manu_lal_1(i), 15,...
-            hex2rgb('#006989'), '^');
+        plt_lal_1 = scatter(Aggs_lal_1(id_agg_lal_1(i)).da,...
+            dbarpp_manu_lal_1(i), 25, hex2rgb('#C96868'), '^',...
+            'LineWidth', 1.5);
         hold on
         
     end
@@ -149,8 +150,9 @@ for i = 1 : n_agg_hal_1
         npp_manu_hal_1(i) = length(dpp_manu_hal_1{i});
         
         figure(f1);
-        plt_hal_1 = scatter(Aggs_hal_1(id_agg_hal_1(i)).da, dbarpp_manu_hal_1(i), 15,...
-            hex2rgb('#C96868'), 's');
+        plt_hal_1 = scatter(Aggs_hal_1(id_agg_hal_1(i)).da,...
+            dbarpp_manu_hal_1(i), 25, hex2rgb('#006989'), 'o',...
+            'LineWidth', 1.5);
         hold on
         
     end
@@ -160,19 +162,22 @@ end
 % plot configs in dpp vs da figure
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([20,1000])
-ylim([10,40])
+[xmin1, xmax1] = bounds(cat(1, cat(1, Aggs_lal_1.da), cat(1, Aggs_hal_1.da)));
+[ymin1, ymax1] = bounds(cat(1, dbarpp_manu_lal_1, dbarpp_manu_hal_1));
+xlim([0.8 * xmin1, 1.2 * xmax1])
+ylim([0.95 * ymin1, 1.05 * ymax1])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
 % number of aggregates to be manually sized
 n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
 
 legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
-    cat(2, strcat('Low agglom. (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
-    strcat('High agglom. (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
+    cat(2, strcat('Low agglomeration (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
+    strcat('High agglomeration (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
     {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'northwest')
+    'location', 'northoutside', 'orientation', 'horizontal',...
+    'NumColumns', 2)
 
 
 %% da comparison subplot %%
@@ -182,15 +187,18 @@ f2 = figure;
 f2.Position = [100, 100, 900, 900];
 set(f2, 'color', 'white');
 
-tt = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+tt2 = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 nexttile
 
 n_aggs_tot = [size(Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0), 2),...
     size(Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0), 2)];
 
-xlbl21 = [strcat('Low agglom. (n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
-    strcat('High agglom. (n =', {' '}, num2str(n_aggs_tot(2)), ')')];
+xlbl21 = [strcat('Low agglom.', '(n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
+    strcat('High agglom.', '(n =', {' '}, num2str(n_aggs_tot(2)), ')')];
 
+% strcat('Low agglom.', string(newline), '(n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
+%     strcat('High agglom.', string(newline), '(n =', {' '}, num2str(n_aggs_tot(2)), ')')];
+% 
 condition21 = [repmat(xlbl21(1), n_aggs_tot(1), 1);...
     repmat(xlbl21(2), n_aggs_tot(2), 1)];
 condition21 = categorical(condition21, {xlbl21{1}, xlbl21{2}});
@@ -342,19 +350,19 @@ bp23 = boxplot([dbarpp_manu_lal_1; dbarpp_manu_hal_1], condition23_4,...
     'Notch', 'on', 'Symbol', 'o', 'Widths', 0.3);
 
 boxes23 = findobj(bp23, 'Tag', 'Box');
-patch(get(boxes23(1), 'XData'), get(boxes23(1), 'YData'), hex2rgb('#DC8686'),...
-    'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
-patch(get(boxes23(2), 'XData'), get(boxes23(2), 'YData'), hex2rgb('#7EACB5'),...
+patch(get(boxes23(1), 'XData'), get(boxes23(1), 'YData'), hex2rgb('#7EACB5'),...
     'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes23(2), 'XData'), get(boxes23(2), 'YData'), hex2rgb('#DC8686'),...
+    'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
 
 medians23 = findobj(bp23, 'Tag', 'Median');
-set(medians23(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
-set(medians23(2), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians23(1), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians23(2), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
 
 outliers23 = findobj(bp23, 'Tag', 'Outliers');
-outliers23(1).MarkerEdgeColor = hex2rgb('#DC8686');
+outliers23(1).MarkerEdgeColor = hex2rgb('#7EACB5');
 outliers23(1).MarkerSize = 3;
-outliers23(2).MarkerEdgeColor = hex2rgb('#7EACB5');
+outliers23(2).MarkerEdgeColor = hex2rgb('#DC8686');
 outliers23(2).MarkerSize = 3;
 
 upwhisker23 = findobj(gca,'type', 'line', 'tag', 'Upper Whisker');
@@ -389,19 +397,19 @@ bp24 = boxplot([sigmapp_manu_lal_1; sigmapp_manu_hal_1], condition23_4,...
 hold on
 
 boxes24 = findobj(bp24, 'Tag', 'Box');
-patch(get(boxes24(1), 'XData'), get(boxes24(1), 'YData'), hex2rgb('#DC8686'),...
-    'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
-patch(get(boxes24(2), 'XData'), get(boxes24(2), 'YData'), hex2rgb('#7EACB5'),...
+patch(get(boxes24(1), 'XData'), get(boxes24(1), 'YData'), hex2rgb('#7EACB5'),...
     'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes24(2), 'XData'), get(boxes24(2), 'YData'), hex2rgb('#DC8686'),...
+    'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
 
 medians24 = findobj(bp24, 'Tag', 'Median');
-set(medians24(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
-set(medians24(2), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians24(1), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians24(2), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
 
 outliers24 = findobj(bp24, 'Tag', 'Outliers');
-outliers24(1).MarkerEdgeColor = hex2rgb('#DC8686');
+outliers24(1).MarkerEdgeColor = hex2rgb('#7EACB5');
 outliers24(1).MarkerSize = 3;
-outliers24(2).MarkerEdgeColor = hex2rgb('#7EACB5');
+outliers24(2).MarkerEdgeColor = hex2rgb('#DC8686');
 outliers24(2).MarkerSize = 3;
 
 upwhisker24 = findobj(gca,'type', 'line', 'tag', 'Upper Whisker');
@@ -433,8 +441,14 @@ ylim([1.15, 1.65])
 
 % initialize figure 3
 f3 = figure;
-f3.Position = [150, 150, 500, 400];
+f3.Position = [150, 150, 900, 400];
 set(f3, 'color', 'white');
+
+tt3 = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+
+condition3 = categorical(xlbl21, {xlbl21{1}, xlbl21{2}});
+
+nexttile
 
 n_subagg_0 = {cat(1,Aggs_lal_1.n_subagg), cat(1,Aggs_hal_1.n_subagg)};
 
@@ -454,32 +468,68 @@ n_hyb = 100 * [nnz(n_subagg{1} == 1),...
 n_hyb(1,:) = n_hyb(1,:) / length(n_subagg{1});
 n_hyb(2,:) = n_hyb(2,:) / length(n_subagg{2});
     
-condition3 = categorical(xlbl21);
-
-b3 = bar(condition3, n_hyb,'stacked');
-clr3 = hex2rgb({'#4793AF', '#FFC470', '#DD5746', '#8B322C'});
+b31 = bar(condition3, n_hyb,'stacked');
+clr31 = hex2rgb({'#C96868', '#FADFA1', '#7EACB5', '#8174A0'});
 
 for i = 1 : size(n_hyb,2)
-    b3(i).BarWidth = 0.2;
-    b3(i).FaceColor = clr3(i,:);
+    b31(i).BarWidth = 0.2;
+    b31(i).FaceColor = clr31(i,:);
 end
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02])
-xlabel('Condition', 'interpreter', 'latex', 'FontSize', 14)
 ylabel('Frequency [$\%$]', 'interpreter', 'latex', 'FontSize', 14)
 
-lgd3 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
+lgd31 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
     '$3 \le n_\mathrm{hyb} \le 5$', '$n_\mathrm{hyb} > 5$'},...
     'interpreter', 'latex', 'FontSize', 11, 'location', 'northoutside',...
     'orientation', 'horizontal', 'NumColumns', 4);
-lgd3.ItemTokenSize = [10, 10];
+lgd31.ItemTokenSize = [10, 10];
+
+nexttile
+
+n_colaps = {cat(1,Aggs_lal_1.n_colaps), cat(1,Aggs_hal_1.n_colaps)};
+
+n_colaps{1}(n_subagg_0{1} < 1) = [];
+r0_colaps{1} = double(n_colaps{1}) ./ double(n_subagg{1});
+n_colaps{2}(n_subagg_0{2} < 1) = [];
+r0_colaps{2} = double(n_colaps{2}) ./ double(n_subagg{2});
+
+r_colaps = 100 * [nnz(r0_colaps{1} == 0),...
+    nnz((r0_colaps{1} > 0) & (r0_colaps{1} < 0.5)),...
+    nnz((r0_colaps{1} >= 0.5) & (r0_colaps{1} < 1)),...
+    nnz(r0_colaps{1} == 1);...
+    nnz(r0_colaps{2} == 0),...
+    nnz((r0_colaps{2} > 0) & (r0_colaps{2} < 0.5)),...
+    nnz((r0_colaps{2} >= 0.5) & (r0_colaps{2} < 1)),...
+    nnz(r0_colaps{2} == 1)];
+r_colaps(1,:) = r_colaps(1,:) / length(n_subagg{1});
+r_colaps(2,:) = r_colaps(2,:) / length(n_subagg{2});
+   
+condition3 = categorical(xlbl21, {xlbl21{1}, xlbl21{2}});
+
+b32 = bar(condition3, r_colaps,'stacked');
+clr32 = hex2rgb({'#DEAA79', '#FFE6A9', '#B1C29E', '#659287'});
+
+for i = 1 : size(r_colaps,2)
+    b32(i).BarWidth = 0.2;
+    b32(i).FaceColor = clr32(i,:);
+end
+
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02])
+
+lgd32 = legend({'$r_\mathrm{clp} = 0$', '$0 < r_\mathrm{clp} < 0.5$',...
+    '$0.5 \le r_\mathrm{clp} < 1$', '$r_\mathrm{clp} = 1$'},...
+    'interpreter', 'latex', 'FontSize', 11, 'location', 'northoutside',...
+    'orientation', 'horizontal', 'NumColumns', 4);
+lgd32.ItemTokenSize = [10, 10];
 
 %% dpp vs. da as a function of n_hyb, not experimental case %%
 
 % initialize figure 4
 f4 = figure;
-f4.Position = [200, 200, 600, 600];
+f4.Position = [200, 200, 550, 600];
 set(f4, 'color', 'white')
 
 plt4 = cell(5,1); % initialize dpp vs da plots per n_hyb
@@ -499,26 +549,26 @@ plt4{1} = plot(da0, dpp0, 'Color', [0.4940 0.1840 0.5560],...
 hold on
 
 plt4{2} = scatter(da_tot(n_subagg_tot == 1), dbarpp_tot(n_subagg_tot == 1),...
-    15, clr3(1,:), '^');
+    25, clr31(1,:), '^', 'LineWidth', 1.5);
 
 plt4{3} = scatter(da_tot(n_subagg_tot == 2), dbarpp_tot(n_subagg_tot == 2),...
-    15, clr3(2,:), 's');
+    35, clr31(2,:), 's', 'LineWidth', 1.5);
 
 plt4{4} = scatter(da_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)),...
-    dbarpp_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)), 25,...
-    clr3(3,:), 'h');
+    dbarpp_tot((n_subagg_tot >= 3) & (n_subagg_tot <= 5)), 35,...
+    clr31(3,:), 'h', 'LineWidth', 1.5);
 
 plt4{5} = scatter(da_tot(n_subagg_tot > 5), dbarpp_tot(n_subagg_tot > 5),...
-    15, clr3(4,:), 'o');
+    25, clr31(4,:), 'o', 'LineWidth', 1.5);
 
 % plot configs
 box on
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-xlim([20,1000])
-ylim([10,40])
+xlim([0.8 * xmin1, 1.2 * xmax1])
+ylim([0.95 * ymin1, 1.05 * ymax1])
 xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 
 % number of aggregates to be manually sized
 n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
@@ -526,8 +576,9 @@ n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
 legend(cat(2, plt4{:}),...
     {'Olfert and Rogak (2019)', '$n_\mathrm{hyb} = 1$',...
     '$n_\mathrm{hyb} = 2$', '$3 \le n_\mathrm{hyb} \le 5$',...
-    '$n_\mathrm{hyb} > 5$'}, 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'northwest')
+    '$n_\mathrm{hyb} > 5$'}, 'interpreter', 'latex', 'FontSize', 12,...
+    'location', 'northoutside', 'orientation', 'horizontal',...
+    'NumColumns', 2)
 
 %% outputs for Langevin dynamics modeling
 
