@@ -3,8 +3,8 @@ clear
 close all
 warning('off')
 
-fname_wsp = '19AUG24_LAL_End_Slider';
-fdir_wsp = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
+fname_wsp = '06FEB25_ExAglom_Slider';
+fdir_wsp = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\Extreme\ExAglom\Aggs\Data';
 
 fadd = cell2mat(strcat(fdir_wsp, {'\'}, fname_wsp, '.mat'));
 
