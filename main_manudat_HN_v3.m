@@ -13,8 +13,8 @@ set(f1, 'color', 'white');
 r0 = (2e4 / 1e0) ^ (1 / (1e4 - 1));
 da0 = 1e0 * ones(1e4, 1) .* r0 .^ (((1:1e4)-1)');
 dpp0 = 17.8 * (da0 / 100) .^ (0.35);
-plt_0 = plot(da0, dpp0, 'Color', [0.4940 0.1840 0.5560],...
-    'LineStyle', '-.', 'LineWidth', 2);
+plt_0 = plot(da0, dpp0, 'Color', hex2rgb('#DEAA79'),... % [0.4940 0.1840 0.5560]
+    'LineStyle', '-.', 'LineWidth', 2.5);
 hold on
 
 %% "low" agglomeration level data - Repeat 1 %%
@@ -159,25 +159,6 @@ for i = 1 : n_agg_hal_1
 
 end
 
-% plot configs in dpp vs da figure
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
-[xmin1, xmax1] = bounds(cat(1, cat(1, Aggs_lal_1.da), cat(1, Aggs_hal_1.da)));
-[ymin1, ymax1] = bounds(cat(1, dbarpp_manu_lal_1, dbarpp_manu_hal_1));
-xlim([0.8 * xmin1, 1.2 * xmax1])
-ylim([0.95 * ymin1, 1.05 * ymax1])
-xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-
-% number of aggregates to be manually sized
-n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1)];
-
-legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
-    cat(2, strcat('Low agglomeration (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
-    strcat('High agglomeration (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
-    {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'northoutside', 'orientation', 'horizontal',...
-    'NumColumns', 2)
 
 %% Load data of high agglomeration diluted condition - Aggregates have high hybridity and low collapse %%
 
@@ -185,6 +166,9 @@ legend(cat(2, plt_lal_1, plt_hal_1, plt_0),...
 
 fname_agg_exdil = '06FEB25_ExAglom_Slider';
 fdir_agg_exdil = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\Extreme\ExAglom\Aggs\Data';
+fname_pp_exdil = 'PFA_ET+NIT_06FEB25_EXAGLOM';
+fdir_pp_exdil= 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\Extreme\ExAglom\PP\CSV';
+id_agg_exdil = [1,5,9,10,12:18,21,22,25,29];
 
 fadd_agg_exdil = cell2mat(strcat(fdir_agg_exdil, {'\'}, fname_agg_exdil, '.mat'));
 load(fadd_agg_exdil);
@@ -209,6 +193,63 @@ for i = 1 : length(vars)
 end
 
 clear vars varname newVarName
+
+% load primary particle size data
+n_agg_exdil = length(id_agg_exdil);
+dpp_manu_exdil = cell(n_agg_exdil, 1);
+dbarpp_manu_exdil = zeros(n_agg_exdil, 1);
+sigmapp_manu_exdil = zeros(n_agg_exdil, 1);
+npp_manu_exdil = zeros(n_agg_exdil, 1);
+
+fadd_pp_exdil = cell(n_agg_exdil, 1);
+
+for i = 1 : n_agg_exdil
+
+    fadd_pp_exdil{i} = char(strcat(fdir_pp_exdil, '\', fname_pp_exdil,...
+        '_', num2str(int8(id_agg_exdil(i))), '.csv'));
+
+    if isfile(fadd_pp_exdil{i})
+
+        % opts_pp = detectImportOptions(fname_pp{i});
+        % opts_pp = setvartype(opts_pp, 'char');
+        pp_manu_exdil = readtable(fadd_pp_exdil{i});
+        
+        dpp_manu_exdil{i} = sqrt(4 * pp_manu_exdil.Area(2:end) / pi);
+
+        dbarpp_manu_exdil(i) = geomean(dpp_manu_exdil{i});
+        sigmapp_manu_exdil(i) = morph.geostd(dpp_manu_exdil{i});
+        npp_manu_exdil(i) = length(dpp_manu_exdil{i});
+        
+        figure(f1);
+        plt_exdil = scatter(Aggs_exdil(id_agg_exdil(i)).da,...
+            dbarpp_manu_exdil(i), 35, hex2rgb('#8174A0'), 's',...
+            'LineWidth', 1.5);
+        hold on
+        
+    end
+
+end
+
+% number of aggregates to be manually sized
+n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1),...
+    size(dpp_manu_exdil, 1)];
+
+% plot configs in dpp vs da figure
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+    'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
+[xmin1, xmax1] = bounds(cat(1, cat(1, Aggs_lal_1.da), cat(1, Aggs_hal_1.da)));
+[ymin1, ymax1] = bounds(cat(1, dbarpp_manu_lal_1, dbarpp_manu_hal_1));
+xlim([0.8 * xmin1, 1.2 * xmax1])
+ylim([0.95 * ymin1, 1.05 * ymax1])
+xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+legend(cat(2, plt_lal_1, plt_hal_1, plt_exdil, plt_0),...
+    cat(2, strcat('Lo-Aglom (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
+    strcat('Mod-Colaps (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
+    strcat('Ex-Aglom (n =', {' '}, num2str(n_aggs_manu(3)), ')'),...
+    {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 11,...
+    'location', 'northoutside', 'orientation', 'horizontal',...
+    'NumColumns', 2)
 
 %% Load data of extreme undiluted agglomeration condition - Aggregates have high hybridity and high collapse %%
 
@@ -246,7 +287,7 @@ clear vars varname newVarName
 
 % initialize figure 2
 f2 = figure;
-f2.Position = [100, 100, 1500, 500];
+f2.Position = [100, 100, 1600, 400];
 set(f2, 'color', 'white');
 
 tt2 = tiledlayout(1, 3, 'Padding', 'compact', 'TileSpacing', 'compact');
@@ -258,34 +299,43 @@ nexttile
 
 dpp_ens_lal_1 = cat(1, cell2mat(dpp_manu_lal_1));
 dpp_ens_hal_1 = cat(1, cell2mat(dpp_manu_hal_1));
+dpp_ens_exdil = cat(1, cell2mat(dpp_manu_exdil));
 
-n_pps_manu = [size(dpp_ens_lal_1, 1), size(dpp_ens_hal_1, 1)];
+n_pps_manu = [size(dpp_ens_lal_1, 1), size(dpp_ens_hal_1, 1),...
+    size(dpp_ens_exdil, 1)];
 
 xlbl21 = [strcat('Lo-Aglom (n =', {' '}, num2str(n_pps_manu(1)), ')'),...
-    strcat('Mod-Colaps (n =', {' '}, num2str(n_pps_manu(2)), ')')];
+    strcat('Mod-Colaps (n =', {' '}, num2str(n_pps_manu(2)), ')'),...
+    strcat('Hi-Aglom (n =', {' '}, num2str(n_pps_manu(3)), ')')];
 
 condition21 = [repmat(xlbl21(1), n_pps_manu(1), 1);...
-    repmat(xlbl21(2), n_pps_manu(2), 1)];
-condition21 = categorical(condition21, {xlbl21{1}, xlbl21{2}});
+    repmat(xlbl21(2), n_pps_manu(2), 1);...
+    repmat(xlbl21(3), n_pps_manu(3), 1)];
+condition21 = categorical(condition21, {xlbl21{1}, xlbl21{2}, xlbl21{3}});
 
-bp21 = boxplot([dpp_ens_lal_1; dpp_ens_hal_1], condition21, 'Notch','on',...
-    'Symbol', 'o', 'Widths', 0.25);
+bp21 = boxplot([dpp_ens_lal_1; dpp_ens_hal_1; dpp_ens_exdil],...
+    condition21, 'Notch', 'on', 'Symbol', 'o', 'Widths', 0.25);
 
 boxes21 = findobj(bp21, 'Tag', 'Box');
 patch(get(boxes21(1), 'XData'), get(boxes21(1), 'YData'),...
     hex2rgb('#DC8686'), 'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
 patch(get(boxes21(2), 'XData'), get(boxes21(2), 'YData'),...
     hex2rgb('#7EACB5'), 'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes21(3), 'XData'), get(boxes21(3), 'YData'),...
+    hex2rgb('#A888B5'), 'EdgeColor', hex2rgb('#8174A0'), 'FaceAlpha', 0.5);
 
 medians21 = findobj(bp21, 'Tag', 'Median');
 set(medians21(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
 set(medians21(2), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians21(3), 'Color', hex2rgb('#574964'), 'LineWidth', 2);
 
 outliers21 = findobj(bp21, 'Tag', 'Outliers');
 outliers21(1).MarkerEdgeColor = hex2rgb('#DC8686');
 outliers21(1).MarkerSize = 3;
 outliers21(2).MarkerEdgeColor = hex2rgb('#7EACB5');
 outliers21(2).MarkerSize = 3;
+outliers21(3).MarkerEdgeColor = hex2rgb('#A888B5');
+outliers21(3).MarkerSize = 3;
 
 upwhisker21 = findobj(gca,'type', 'line', 'tag', 'Upper Whisker');
 set(upwhisker21, 'linestyle', '-');
@@ -297,12 +347,15 @@ hold on
 % Compute kernel density estimate for each condition
 [f_dpp_lal_1, xi_dpp_lal_1] = ksdensity(log10(dpp_ens_lal_1));
 [f_dpp_hal_1, xi_dpp_hal_1] = ksdensity(log10(dpp_ens_hal_1));
+[f_dpp_exdil, xi_dpp_exdil] = ksdensity(log10(dpp_ens_exdil));
 
 % to avoid issue with log scale in y axis
 f_dpp_lal_1(xi_dpp_lal_1 <= 0) = [];
 xi_dpp_lal_1(xi_dpp_lal_1 <= 0) = [];
 f_dpp_hal_1(xi_dpp_hal_1 <= 0) = [];
 xi_dpp_hal_1(xi_dpp_hal_1 <= 0) = [];
+f_dpp_exdil(xi_dpp_exdil <= 0) = [];
+xi_dpp_exdil(xi_dpp_exdil <= 0) = [];
 
 scale21 = -0.1;
 
@@ -318,10 +371,16 @@ fill([scale21 * f_dpp_hal_1 + 1.7, 1.7 * ones(size(f_dpp_hal_1))],...
      [10.^xi_dpp_hal_1, fliplr(10.^xi_dpp_hal_1)], hex2rgb('#7EACB5'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.02 0.02], 'YScale', 'log')
+plot(scale21 * f_dpp_exdil + 2.7, 10.^xi_dpp_exdil, 'Color',...
+    hex2rgb('#8174A0'), 'LineWidth', 1.25)
+fill([scale21 * f_dpp_exdil + 2.7, 2.7 * ones(size(f_dpp_exdil))],...
+     [10.^xi_dpp_exdil, fliplr(10.^xi_dpp_exdil)], hex2rgb('#A888B5'),...
+     'FaceAlpha', 0.5, 'EdgeColor', 'none');
+
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
+    'TickLength', [0.015 0.015], 'YScale', 'log')
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-xlim([0.3, 2.3])
+xlim([0.3, 3.3])
 ylim([3, 80])
 
 %% avereage dpp within aggregates comparison subplot %%
@@ -329,30 +388,38 @@ ylim([3, 80])
 nexttile
 
 xlbl22 = [strcat('Lo-Aglom (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
-    strcat('Mod-Colaps (n =', {' '}, num2str(n_aggs_manu(2)), ')')];
+    strcat('Mod-Colaps (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
+    strcat('Hi-Aglom (n =', {' '}, num2str(n_aggs_manu(3)), ')')];
 
 condition22_23 = categorical([repmat(xlbl22(1), n_aggs_manu(1), 1);...
-    repmat(xlbl22(2), n_aggs_manu(2), 1)]);
-condition22_23 = categorical(condition22_23, {xlbl22{1}, xlbl22{2}});
+    repmat(xlbl22(2), n_aggs_manu(2), 1);...
+    repmat(xlbl22(3), n_aggs_manu(3), 1)]);
+condition22_23 = categorical(condition22_23, {xlbl22{1}, xlbl22{2},...
+    xlbl22{3}});
 
-bp22 = boxplot([dbarpp_manu_lal_1; dbarpp_manu_hal_1], condition22_23,...
-    'Notch', 'on', 'Symbol', 'o', 'Widths', 0.3);
+bp22 = boxplot([dbarpp_manu_lal_1; dbarpp_manu_hal_1; dbarpp_manu_exdil],...
+    condition22_23, 'Notch', 'on', 'Symbol', 'o', 'Widths', 0.3);
 
 boxes22 = findobj(bp22, 'Tag', 'Box');
 patch(get(boxes22(1), 'XData'), get(boxes22(1), 'YData'), hex2rgb('#DC8686'),...
     'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
 patch(get(boxes22(2), 'XData'), get(boxes22(2), 'YData'), hex2rgb('#7EACB5'),...
     'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes22(3), 'XData'), get(boxes22(3), 'YData'), hex2rgb('#A888B5'),...
+    'EdgeColor', hex2rgb('#8174A0'), 'FaceAlpha', 0.5);
 
 medians22 = findobj(bp22, 'Tag', 'Median');
 set(medians22(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
 set(medians22(2), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians22(3), 'Color', hex2rgb('#574964'), 'LineWidth', 2);
 
 outliers22 = findobj(bp22, 'Tag', 'Outliers');
 outliers22(1).MarkerEdgeColor = hex2rgb('#DC8686');
 outliers22(1).MarkerSize = 3;
 outliers22(2).MarkerEdgeColor = hex2rgb('#7EACB5');
 outliers22(2).MarkerSize = 3;
+outliers22(3).MarkerEdgeColor = hex2rgb('#A888B5');
+outliers22(3).MarkerSize = 3;
 
 upwhisker22 = findobj(gca,'type', 'line', 'tag', 'Upper Whisker');
 set(upwhisker22, 'linestyle', '-');
@@ -364,16 +431,19 @@ hold on
 % ensemble geometric mean of primary particle size 
 dbarpp_ens_lal_1 = geomean(dpp_ens_lal_1);
 dbarpp_ens_hal_1 = geomean(dpp_ens_hal_1);
-plot([1.6, 2.4], [dbarpp_ens_lal_1, dbarpp_ens_lal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':')
-plt22_ens = plot([0.6, 1.4], [dbarpp_ens_hal_1, dbarpp_ens_hal_1], 'Color',...
+dbarpp_ens_exdil = geomean(dpp_ens_exdil);
+plot([0.6, 1.4], [dbarpp_ens_lal_1, dbarpp_ens_lal_1], 'Color',...
     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+plot([1.6, 2.4], [dbarpp_ens_hal_1, dbarpp_ens_hal_1], 'Color',...
+    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+plt22_ens = plot([2.6, 3.4], [dbarpp_ens_exdil, dbarpp_ens_exdil],...
+    'Color', [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
 
 legend(plt22_ens, '$\langle{d_\mathrm{pp}}\rangle$ (Ensemble GM)',...
-    'interpreter', 'latex', 'FontSize', 11, 'location', 'southeast')
+    'interpreter', 'latex', 'FontSize', 10, 'location', 'northeast')
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.02 0.02])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
+    'TickLength', [0.015 0.015])
 ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 ylim([11.5, 29.5])
 
@@ -381,8 +451,8 @@ ylim([11.5, 29.5])
 
 nexttile
 
-bp23 = boxplot([sigmapp_manu_lal_1; sigmapp_manu_hal_1], condition22_23,...
-    'Notch', 'on', 'Symbol', 'o', 'Widths', 0.3);
+bp23 = boxplot([sigmapp_manu_lal_1; sigmapp_manu_hal_1; sigmapp_manu_exdil],...
+    condition22_23, 'Notch', 'on', 'Symbol', 'o', 'Widths', 0.3);
 hold on
 
 boxes23 = findobj(bp23, 'Tag', 'Box');
@@ -390,16 +460,21 @@ patch(get(boxes23(1), 'XData'), get(boxes23(1), 'YData'), hex2rgb('#DC8686'),...
     'EdgeColor', hex2rgb('#8D493A'), 'FaceAlpha', 0.5);
 patch(get(boxes23(2), 'XData'), get(boxes23(2), 'YData'), hex2rgb('#7EACB5'),...
     'EdgeColor', hex2rgb('#537188'), 'FaceAlpha', 0.5);
+patch(get(boxes23(3), 'XData'), get(boxes23(3), 'YData'), hex2rgb('#A888B5'),...
+    'EdgeColor', hex2rgb('#8174A0'), 'FaceAlpha', 0.5);
 
 medians23 = findobj(bp23, 'Tag', 'Median');
 set(medians23(1), 'Color', hex2rgb('#632626'), 'LineWidth', 2);
 set(medians23(2), 'Color', hex2rgb('#374259'), 'LineWidth', 2);
+set(medians23(3), 'Color', hex2rgb('#574964'), 'LineWidth', 2);
 
 outliers23 = findobj(bp23, 'Tag', 'Outliers');
 outliers23(1).MarkerEdgeColor = hex2rgb('#DC8686');
 outliers23(1).MarkerSize = 3;
 outliers23(2).MarkerEdgeColor = hex2rgb('#7EACB5');
 outliers23(2).MarkerSize = 3;
+outliers23(3).MarkerEdgeColor = hex2rgb('#A888B5');
+outliers23(3).MarkerSize = 3;
 
 upwhisker23 = findobj(gca,'type', 'line', 'tag', 'Upper Whisker');
 set(upwhisker23, 'linestyle', '-');
@@ -411,17 +486,20 @@ hold on
 % ensemble geometric standard deviation of primary particle size 
 sigma_ens_lal_1 = morph.geostd(dpp_ens_lal_1);
 sigma_ens_hal_1 = morph.geostd(dpp_ens_hal_1);
+sigma_ens_exdil = morph.geostd(dpp_ens_exdil);
 
-plot([1.6, 2.4], [sigma_ens_lal_1, sigma_ens_lal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':')
-plt23_ens = plot([0.6, 1.4], [sigma_ens_hal_1, sigma_ens_hal_1], 'Color',...
+plot([0.6, 1.4], [sigma_ens_lal_1, sigma_ens_lal_1], 'Color',...
+    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+plot([1.6, 2.4], [sigma_ens_hal_1, sigma_ens_hal_1], 'Color',...
+    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+plt23_ens = plot([2.6, 3.4], [sigma_ens_exdil, sigma_ens_exdil], 'Color',...
     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
 
 legend(plt23_ens, '$\gamma_\mathrm{pp}$ (Ensemble GSD)', 'interpreter',...
-    'latex', 'FontSize', 11, 'location', 'southeast')
+    'latex', 'FontSize', 10, 'location', 'northeast')
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.02 0.02], 'YScale', 'log')
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
+    'TickLength', [0.015 0.015], 'YScale', 'log')
 yticks([1.2 1.3 1.4 1.5 1.6])
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
 ylim([1.15, 1.65])
@@ -540,7 +618,7 @@ fill([scale31 * f_da_excol + 3.7, 3.7 * ones(size(f_da_excol))],...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.02 0.02], 'YScale', 'log')
+    'TickLength', [0.015 0.015], 'YScale', 'log')
 ylabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 4.3])
 ylim([20, 3000])
@@ -634,7 +712,7 @@ fill([scale32 * f_ca_excol + 3.7, 3.7 * ones(size(f_ca_excol))],...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.02 0.02])
+    'TickLength', [0.015 0.015])
 ylabel('$c_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 4.3])
 ylim([0, 1])
@@ -728,7 +806,7 @@ fill([scale33 * f_za_excol + 3.7, 3.7 * ones(size(f_za_excol))],...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.02 0.02])
+    'TickLength', [0.015 0.015])
 ylabel('$z_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 4.3])
 ylim([0.1, 0.71])
@@ -822,7 +900,7 @@ fill([scale34 * f_sa_excol + 3.7, 3.7 * ones(size(f_sa_excol))],...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.02 0.02])
+    'TickLength', [0.015 0.015])
 ylabel('$s_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
 xlim([0.3, 4.3])
 ylim([0.5, 2.75])
@@ -855,26 +933,30 @@ n_subagg{2}(n_subagg_0{2} < 1) = [];
 n_hyb = 100 * [nnz(n_subagg{1} == 1),...
     nnz(n_subagg{1} == 2),...
     nnz((n_subagg{1} >= 3) & (n_subagg{1} <= 5)),...
-    nnz(n_subagg{1} > 5);...
+    nnz((n_subagg{1} >= 6) & (n_subagg{1} <= 10)),...
+    nnz(n_subagg{1} > 10);...
     nnz(n_subagg{2} == 1),...
     nnz(n_subagg{2} == 2),...
     nnz((n_subagg{2} >= 3) & (n_subagg{2} <= 5)),...
-    nnz(n_subagg{2} > 5);...
+    nnz((n_subagg{2} >= 6) & (n_subagg{2} <= 10)),...
+    nnz(n_subagg{2} > 10);...
     nnz(n_subagg{3} == 1),...
     nnz(n_subagg{3} == 2),...
     nnz((n_subagg{3} >= 3) & (n_subagg{3} <= 5)),...
-    nnz(n_subagg{3} > 5);...
+    nnz((n_subagg{3} >= 5) & (n_subagg{3} <= 10)),...
+    nnz(n_subagg{3} > 10);...
     nnz(n_subagg{4} == 1),...
     nnz(n_subagg{4} == 2),...
     nnz((n_subagg{4} >= 3) & (n_subagg{4} <= 5)),...
-    nnz(n_subagg{4} > 5)];
+    nnz((n_subagg{4} >= 6) & (n_subagg{4} <= 10)),...
+    nnz(n_subagg{4} > 10)];
 n_hyb(1,:) = n_hyb(1,:) / length(n_subagg{1});
 n_hyb(2,:) = n_hyb(2,:) / length(n_subagg{2});
 n_hyb(3,:) = n_hyb(3,:) / length(n_subagg{3});
 n_hyb(4,:) = n_hyb(4,:) / length(n_subagg{4});
 
 b41 = bar(condition4, n_hyb,'stacked');
-clr41 = hex2rgb({'#C96868', '#FADFA1', '#7EACB5', '#8174A0'});
+clr41 = hex2rgb({'#C96868', '#FADFA1', '#7EACB5', '#8174A0', '#574964'});
 
 for i = 1 : size(n_hyb,2)
     b41(i).BarWidth = 0.3;
@@ -884,11 +966,13 @@ end
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.01 0.01])
 ylabel('Frequency [$\%$]', 'interpreter', 'latex', 'FontSize', 14)
+ylim([0 100])
 
 lgd41 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
-    '$3 \le n_\mathrm{hyb} \le 5$', '$n_\mathrm{hyb} > 5$'},...
-    'interpreter', 'latex', 'FontSize', 12, 'location', 'northoutside',...
-    'orientation', 'horizontal', 'NumColumns', 4);
+    '$3 \le n_\mathrm{hyb} \le 5$', '$6 \le n_\mathrm{hyb} \le 10$',...
+    '$n_\mathrm{hyb} > 10$'}, 'interpreter', 'latex', 'FontSize', 12,...
+    'location', 'northoutside', 'orientation', 'horizontal',...
+    'NumColumns', 5);
 lgd41.ItemTokenSize = [10, 10];
 
 nexttile
@@ -904,20 +988,24 @@ r0_colaps{3} = double(n_colaps{3}) ./ double(n_subagg{3});
 r0_colaps{4} = double(n_colaps{4}) ./ double(n_subagg{4});
 
 r_colaps = 100 * [nnz(r0_colaps{1} == 0),...
-    nnz((r0_colaps{1} > 0) & (r0_colaps{1} < 0.5)),...
-    nnz((r0_colaps{1} >= 0.5) & (r0_colaps{1} < 1)),...
+    nnz((r0_colaps{1} > 0) & (r0_colaps{1} < 0.33)),...
+    nnz((r0_colaps{1} >= 0.33) & (r0_colaps{1} <= 0.67)),...
+    nnz((r0_colaps{1} > 0.67) & (r0_colaps{1} < 1)),...
     nnz(r0_colaps{1} == 1);...
     nnz(r0_colaps{2} == 0),...
-    nnz((r0_colaps{2} > 0) & (r0_colaps{2} < 0.5)),...
-    nnz((r0_colaps{2} >= 0.5) & (r0_colaps{2} < 1)),...
+    nnz((r0_colaps{2} > 0) & (r0_colaps{2} < 0.33)),...
+    nnz((r0_colaps{2} >= 0.33) & (r0_colaps{2} <= 0.67)),...
+    nnz((r0_colaps{2} > 0.67) & (r0_colaps{2} < 1)),...
     nnz(r0_colaps{2} == 1);...
     nnz(r0_colaps{3} == 0),...
-    nnz((r0_colaps{3} > 0) & (r0_colaps{3} < 0.5)),...
-    nnz((r0_colaps{3} >= 0.5) & (r0_colaps{3} < 1)),...
+    nnz((r0_colaps{3} > 0) & (r0_colaps{3} < 0.33)),...
+    nnz((r0_colaps{3} >= 0.33) & (r0_colaps{3} <= 0.67)),...
+    nnz((r0_colaps{3} > 0.67) & (r0_colaps{3} < 1)),...
     nnz(r0_colaps{3} == 1);...
     nnz(r0_colaps{4} == 0),...
-    nnz((r0_colaps{4} > 0) & (r0_colaps{4} < 0.5)),...
-    nnz((r0_colaps{4} >= 0.5) & (r0_colaps{4} < 1)),...
+    nnz((r0_colaps{4} > 0) & (r0_colaps{4} < 0.33)),...
+    nnz((r0_colaps{4} >= 0.33) & (r0_colaps{4} <= 0.67)),...
+    nnz((r0_colaps{4} > 0.67) & (r0_colaps{4} < 1)),...
     nnz(r0_colaps{4} == 1)];
 r_colaps(1,:) = r_colaps(1,:) / length(n_subagg{1});
 r_colaps(2,:) = r_colaps(2,:) / length(n_subagg{2});
@@ -928,7 +1016,7 @@ condition4 = categorical(xlbl4, {xlbl4{1}, xlbl4{2}, xlbl4{3},...
     xlbl4{4}});
 
 b42 = bar(condition4, r_colaps,'stacked');
-clr42 = hex2rgb({'#DEAA79', '#FFE6A9', '#B1C29E', '#659287'});
+clr42 = hex2rgb({'#DEAA79', '#FFE6A9', '#B1C29E', '#659287', '#3A4D39'});
 
 for i = 1 : size(r_colaps,2)
     b42(i).BarWidth = 0.3;
@@ -937,11 +1025,12 @@ end
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
     'TickLength', [0.01 0.01])
+ylim([0 100])
 
-lgd42 = legend({'$r_\mathrm{clp} = 0$', '$0 < r_\mathrm{clp} < 0.5$',...
-    '$0.5 \le r_\mathrm{clp} < 1$', '$r_\mathrm{clp} = 1$'},...
-    'interpreter', 'latex', 'FontSize', 12, 'location', 'northoutside',...
-    'orientation', 'horizontal', 'NumColumns', 4);
+lgd42 = legend({'$r_\mathrm{clp} = 0$', '$0 < r_\mathrm{clp} < 0.33$',...
+    '$0.33 \le r_\mathrm{clp} \le 0.67$', '$0.67 < r_\mathrm{clp} < 1$',...
+    '$r_\mathrm{clp} = 1$'}, 'interpreter', 'latex', 'FontSize', 12,...
+    'location', 'northoutside', 'orientation', 'horizontal', 'NumColumns', 5);
 lgd42.ItemTokenSize = [10, 10];
 
 %% dpp vs. da as a function of n_hyb, not experimental case %%
@@ -963,8 +1052,8 @@ dbarpp_tot = [dbarpp_manu_lal_1; dbarpp_manu_hal_1];
 da_tot = [cat(1, Aggs_lal_1(id_agg_lal_1).da);...
     cat(1, Aggs_hal_1(id_agg_hal_1).da)];
 
-plt5{1} = plot(da0, dpp0, 'Color', [0.4940 0.1840 0.5560],...
-    'LineStyle', '-.', 'LineWidth', 2);
+plt5{1} = plot(da0, dpp0, 'Color', hex2rgb('#DEAA79'),... % [0.4940 0.1840 0.5560]
+    'LineStyle', '-.', 'LineWidth', 2.5);
 hold on
 
 plt5{2} = scatter(da_tot(n_subagg_tot == 1), dbarpp_tot(n_subagg_tot == 1),...

@@ -5,8 +5,8 @@ warning('off')
 
 %% load previously saved image variables
 
-fname = '28AUG24_HAL_End_Slider'; % name of the MATLAB worksapce file that has aggregate info
-fdir = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\26SEP24_PFA_ET+NIT_HAL_28AUG24_End\ATEMS_Area'; % directory to the file to be imported
+fname = '06FEB25_ExAglom_Slider'; % name of the MATLAB worksapce file that has aggregate info
+fdir = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\Extreme\ExAglom\Aggs\Data'; % directory to the file to be imported
 
 lbl = 'PFA_ET+NIT_28AUG24_HAL_End'; % label to be added later to the end of variables
 
@@ -15,6 +15,7 @@ fadd = cell2mat(strcat(fdir, {'\'}, fname,'.mat')); % load the MATLAB workspace 
 load(fadd);
 
 % ii = sort(randperm(length(Aggs), 25)); % aggregate ids to be looped over for labeling (empty means all)
+ii = [21,25,29];
 
 %% assign points and id labels to the aggregates in images
 
