@@ -6,7 +6,7 @@ warning('off')
 %% initialize dpp vs. da figure %%
 
 f1 = figure;
-f1.Position = [50, 50, 550, 600];
+f1.Position = [50, 50, 650, 800];
 set(f1, 'color', 'white');
 
 % plot universal correlation
@@ -14,7 +14,7 @@ r0 = (2e4 / 1e0) ^ (1 / (1e4 - 1));
 da0 = 1e0 * ones(1e4, 1) .* r0 .^ (((1:1e4)-1)');
 dpp0 = 17.8 * (da0 / 100) .^ (0.35);
 plt_0 = plot(da0, dpp0, 'Color', hex2rgb('#DEAA79'),... % [0.4940 0.1840 0.5560]
-    'LineStyle', '-.', 'LineWidth', 2.5);
+    'LineStyle', '-.', 'LineWidth', 3);
 hold on
 
 %% "low" agglomeration level data - Repeat 1 %%
@@ -235,20 +235,23 @@ n_aggs_manu = [size(dpp_manu_lal_1, 1), size(dpp_manu_hal_1, 1),...
     size(dpp_manu_exdil, 1)];
 
 % plot configs in dpp vs da figure
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
     'TickLength', [0.02 0.02], 'XScale', 'log', 'YScale', 'log')
 [xmin1, xmax1] = bounds(cat(1, cat(1, Aggs_lal_1.da), cat(1, Aggs_hal_1.da)));
 [ymin1, ymax1] = bounds(cat(1, dbarpp_manu_lal_1, dbarpp_manu_hal_1));
-xlim([0.8 * xmin1, 1.2 * xmax1])
+xlim([0.85 * xmin1, 1.2 * xmax1])
 ylim([0.95 * ymin1, 1.05 * ymax1])
-xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+xlabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 24)
+xticks(cat(2,linspace(30,100,8),linspace(200,700,6)))
+xtickangle(90)
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex',...
+    'FontSize', 24)
 legend(cat(2, plt_lal_1, plt_hal_1, plt_exdil, plt_0),...
     cat(2, strcat('Lo-Aglom (n =', {' '}, num2str(n_aggs_manu(1)), ')'),...
     strcat('Mod-Colaps (n =', {' '}, num2str(n_aggs_manu(2)), ')'),...
     strcat('Ex-Aglom (n =', {' '}, num2str(n_aggs_manu(3)), ')'),...
-    {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 11,...
-    'location', 'northoutside', 'orientation', 'horizontal',...
+    {'Olfert and Rogak (2019)'}), 'interpreter', 'latex', 'FontSize', 16,...
+    'location', 'southoutside', 'Orientation', 'horizontal',...
     'NumColumns', 2)
 
 %% Load data of extreme undiluted agglomeration condition - Aggregates have high hybridity and high collapse %%
@@ -287,10 +290,10 @@ clear vars varname newVarName
 
 % initialize figure 2
 f2 = figure;
-f2.Position = [100, 100, 1600, 400];
+f2.Position = [100, 100, 1400, 500];
 set(f2, 'color', 'white');
 
-tt2 = tiledlayout(1, 3, 'Padding', 'compact', 'TileSpacing', 'compact');
+tt2 = tiledlayout(1, 3, 'Padding', 'loose', 'TileSpacing', 'loose');
 nexttile
 
 % strcat('Low agglom.', string(newline), '(n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
@@ -377,11 +380,13 @@ fill([scale21 * f_dpp_exdil + 2.7, 2.7 * ones(size(f_dpp_exdil))],...
      [10.^xi_dpp_exdil, fliplr(10.^xi_dpp_exdil)], hex2rgb('#A888B5'),...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015], 'YScale', 'log')
-ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
+    'TickLength', [0.02 0.02], 'YScale', 'log')
+ylabel('$d_\mathrm{pp}^\mathrm{(i)}$ [nm]', 'interpreter', 'latex',...
+    'FontSize', 24)
 xlim([0.3, 3.3])
 ylim([3, 80])
+yticks(linspace(10,70,7))
 
 %% avereage dpp within aggregates comparison subplot %%
 
@@ -432,19 +437,19 @@ hold on
 dbarpp_ens_lal_1 = geomean(dpp_ens_lal_1);
 dbarpp_ens_hal_1 = geomean(dpp_ens_hal_1);
 dbarpp_ens_exdil = geomean(dpp_ens_exdil);
-plot([0.6, 1.4], [dbarpp_ens_lal_1, dbarpp_ens_lal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
-plot([1.6, 2.4], [dbarpp_ens_hal_1, dbarpp_ens_hal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
-plt22_ens = plot([2.6, 3.4], [dbarpp_ens_exdil, dbarpp_ens_exdil],...
-    'Color', [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plot([0.6, 1.4], [dbarpp_ens_lal_1, dbarpp_ens_lal_1], 'Color',...
+%     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plot([1.6, 2.4], [dbarpp_ens_hal_1, dbarpp_ens_hal_1], 'Color',...
+%     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plt22_ens = plot([2.6, 3.4], [dbarpp_ens_exdil, dbarpp_ens_exdil],...
+%     'Color', [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% 
+% legend(plt22_ens, '$\langle{d_\mathrm{pp}}\rangle$ (Ensemble GM)',...
+%     'interpreter', 'latex', 'FontSize', 10, 'location', 'northeast')
 
-legend(plt22_ens, '$\langle{d_\mathrm{pp}}\rangle$ (Ensemble GM)',...
-    'interpreter', 'latex', 'FontSize', 10, 'location', 'northeast')
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015])
-ylabel('$\overline{d}_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
+    'TickLength', [0.02 0.02])
+ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 24)
 ylim([11.5, 29.5])
 
 %% GSD of pp within aggregates comparison subplot %%
@@ -488,30 +493,30 @@ sigma_ens_lal_1 = morph.geostd(dpp_ens_lal_1);
 sigma_ens_hal_1 = morph.geostd(dpp_ens_hal_1);
 sigma_ens_exdil = morph.geostd(dpp_ens_exdil);
 
-plot([0.6, 1.4], [sigma_ens_lal_1, sigma_ens_lal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
-plot([1.6, 2.4], [sigma_ens_hal_1, sigma_ens_hal_1], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
-plt23_ens = plot([2.6, 3.4], [sigma_ens_exdil, sigma_ens_exdil], 'Color',...
-    [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plot([0.6, 1.4], [sigma_ens_lal_1, sigma_ens_lal_1], 'Color',...
+%     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plot([1.6, 2.4], [sigma_ens_hal_1, sigma_ens_hal_1], 'Color',...
+%     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% plt23_ens = plot([2.6, 3.4], [sigma_ens_exdil, sigma_ens_exdil], 'Color',...
+%     [0, 0, 0], 'LineWidth', 1.25, 'LineStyle', ':');
+% 
+% legend(plt23_ens, '$\gamma_\mathrm{pp}$ (Ensemble GSD)', 'interpreter',...
+%     'latex', 'FontSize', 10, 'location', 'northeast')
 
-legend(plt23_ens, '$\gamma_\mathrm{pp}$ (Ensemble GSD)', 'interpreter',...
-    'latex', 'FontSize', 10, 'location', 'northeast')
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015], 'YScale', 'log')
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
+    'TickLength', [0.02 0.02], 'YScale', 'log')
 yticks([1.2 1.3 1.4 1.5 1.6])
-ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 14)
+ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
 ylim([1.15, 1.65])
 
 %% da comparison subplot %%
 
 % initialize figure 2
 f3 = figure;
-f3.Position = [100, 0, 1000, 800];
+f3.Position = [100, 50, 900, 900];
 set(f3, 'color', 'white');
 
-tt3 = tiledlayout(2, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+tt3 = tiledlayout(2, 2, 'Padding', 'loose', 'TileSpacing', 'compact');
 nexttile
 
 n_aggs_tot = [size(Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0), 2),...
@@ -537,6 +542,14 @@ bp31 = boxplot([cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da);...
     cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da);...
     cat(1, Aggs_exdil.da); cat(1, Aggs_excol.da)],...
     condition31, 'Notch', 'on', 'Symbol', 'o', 'Widths', 0.25);
+
+GMs_da = [geomean(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)),...
+    geomean(cat(1, Aggs_hal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)),...
+    geomean(cat(1, Aggs_exdil.da)), geomean(cat(1, Aggs_excol.da))];
+
+GSDs_da = [morph.geostd(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)),...
+    morph.geostd(cat(1, Aggs_hal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)),...
+    morph.geostd(cat(1, Aggs_exdil.da)), morph.geostd(cat(1, Aggs_excol.da))];
 
 boxes31 = findobj(bp31, 'Tag', 'Box');
 patch(get(boxes31(1), 'XData'), get(boxes31(1), 'YData'), hex2rgb('#DC8686'),...
@@ -569,58 +582,58 @@ set(upwhisker31, 'linestyle', '-');
 lowwhisker31= findobj(gca, 'type', 'line','tag', 'Lower Whisker');
 set(lowwhisker31, 'linestyle', '-');
 
-hold on
-
-% Compute kernel density estimate for each condition
-[f_da_lal_1, xi_da_lal_1] =...
-    ksdensity(log10(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)));
-[f_da_hal_1, xi_da_hal_1] =...
-    ksdensity(log10(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da)));
-[f_da_exdil, xi_da_exdil] =...
-    ksdensity(log10(cat(1, Aggs_exdil.da)));
-[f_da_excol, xi_da_excol] =...
-    ksdensity(log10(cat(1, Aggs_excol.da)));
-
-% to avoid issue with log scale in y axis
-f_da_lal_1(xi_da_lal_1 <= 0) = [];
-xi_da_lal_1(xi_da_lal_1 <= 0) = [];
-f_da_hal_1(xi_da_hal_1 <= 0) = [];
-xi_da_hal_1(xi_da_hal_1 <= 0) = [];
-f_da_exdil(xi_da_exdil <= 0) = [];
-xi_da_exdil(xi_da_exdil <= 0) = [];
-f_da_excol(xi_da_excol <= 0) = [];
-xi_da_excol(xi_da_excol <= 0) = [];
-
-scale31 = -0.15;
-
-plot(scale31 * f_da_lal_1 + 0.7, 10.^xi_da_lal_1, 'Color', hex2rgb('#8D493A'),...
-    'LineWidth', 1.25)
-fill([scale31 * f_da_lal_1 + 0.7, 0.7 * ones(size(f_da_lal_1))],...
-     [10.^xi_da_lal_1, fliplr(10.^xi_da_lal_1)], hex2rgb('#DC8686'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale31 * f_da_hal_1 + 1.7, 10.^xi_da_hal_1, 'Color', hex2rgb('#537188'),...
-    'LineWidth', 1.25)
-fill([scale31 * f_da_hal_1 + 1.7, 1.7 * ones(size(f_da_hal_1))],...
-     [10.^xi_da_hal_1, fliplr(10.^xi_da_hal_1)], hex2rgb('#7EACB5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale31 * f_da_exdil + 2.7, 10.^xi_da_exdil, 'Color', hex2rgb('#8174A0'),...
-    'LineWidth', 1.25)
-fill([scale31 * f_da_exdil + 2.7, 2.7 * ones(size(f_da_exdil))],...
-     [10.^xi_da_exdil, fliplr(10.^xi_da_exdil)], hex2rgb('#A888B5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale31 * f_da_excol + 3.7, 10.^xi_da_excol, 'Color', hex2rgb('#659287'),...
-    'LineWidth', 1.25)
-fill([scale31 * f_da_excol + 3.7, 3.7 * ones(size(f_da_excol))],...
-     [10.^xi_da_excol, fliplr(10.^xi_da_excol)], hex2rgb('#B1C29E'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015], 'YScale', 'log')
-ylabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-xlim([0.3, 4.3])
+% hold on
+% 
+% % Compute kernel density estimate for each condition
+% [f_da_lal_1, xi_da_lal_1] =...
+%     ksdensity(log10(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da)));
+% [f_da_hal_1, xi_da_hal_1] =...
+%     ksdensity(log10(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).da)));
+% [f_da_exdil, xi_da_exdil] =...
+%     ksdensity(log10(cat(1, Aggs_exdil.da)));
+% [f_da_excol, xi_da_excol] =...
+%     ksdensity(log10(cat(1, Aggs_excol.da)));
+% 
+% % to avoid issue with log scale in y axis
+% f_da_lal_1(xi_da_lal_1 <= 0) = [];
+% xi_da_lal_1(xi_da_lal_1 <= 0) = [];
+% f_da_hal_1(xi_da_hal_1 <= 0) = [];
+% xi_da_hal_1(xi_da_hal_1 <= 0) = [];
+% f_da_exdil(xi_da_exdil <= 0) = [];
+% xi_da_exdil(xi_da_exdil <= 0) = [];
+% f_da_excol(xi_da_excol <= 0) = [];
+% xi_da_excol(xi_da_excol <= 0) = [];
+% 
+% scale31 = -0.15;
+% 
+% plot(scale31 * f_da_lal_1 + 0.7, 10.^xi_da_lal_1, 'Color', hex2rgb('#8D493A'),...
+%     'LineWidth', 1.25)
+% fill([scale31 * f_da_lal_1 + 0.7, 0.7 * ones(size(f_da_lal_1))],...
+%      [10.^xi_da_lal_1, fliplr(10.^xi_da_lal_1)], hex2rgb('#DC8686'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale31 * f_da_hal_1 + 1.7, 10.^xi_da_hal_1, 'Color', hex2rgb('#537188'),...
+%     'LineWidth', 1.25)
+% fill([scale31 * f_da_hal_1 + 1.7, 1.7 * ones(size(f_da_hal_1))],...
+%      [10.^xi_da_hal_1, fliplr(10.^xi_da_hal_1)], hex2rgb('#7EACB5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale31 * f_da_exdil + 2.7, 10.^xi_da_exdil, 'Color', hex2rgb('#8174A0'),...
+%     'LineWidth', 1.25)
+% fill([scale31 * f_da_exdil + 2.7, 2.7 * ones(size(f_da_exdil))],...
+%      [10.^xi_da_exdil, fliplr(10.^xi_da_exdil)], hex2rgb('#A888B5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale31 * f_da_excol + 3.7, 10.^xi_da_excol, 'Color', hex2rgb('#659287'),...
+%     'LineWidth', 1.25)
+% fill([scale31 * f_da_excol + 3.7, 3.7 * ones(size(f_da_excol))],...
+%      [10.^xi_da_excol, fliplr(10.^xi_da_excol)], hex2rgb('#B1C29E'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 14,...
+    'TickLength', [0.02 0.02], 'YScale', 'log')
+ylabel('$d_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 18)
+% xlim([0.3, 4.3])
 ylim([20, 3000])
 
 %% circularity distribution
@@ -663,58 +676,58 @@ set(upwhisker32, 'linestyle', '-');
 lowwhisker32 = findobj(gca, 'type', 'line','tag', 'Lower Whisker');
 set(lowwhisker32, 'linestyle', '-');
 
-hold on
+% hold on
+% 
+% % Compute kernel density estimate for each condition
+% [f_ca_lal_1, xi_ca_lal_1] =...
+%     ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).ca));
+% [f_ca_hal_1, xi_ca_hal_1] =...
+%     ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).ca));
+% [f_ca_exdil, xi_ca_exdil] =...
+%     ksdensity(cat(1, Aggs_exdil.ca));
+% [f_ca_excol, xi_ca_excol] =...
+%     ksdensity(cat(1, Aggs_excol.ca));
+% 
+% % to avoid issue with log scale in y axis
+% f_ca_lal_1(xi_ca_lal_1 <= 0) = [];
+% xi_ca_lal_1(xi_ca_lal_1 <= 0) = [];
+% f_ca_hal_1(xi_ca_hal_1 <= 0) = [];
+% xi_ca_hal_1(xi_ca_hal_1 <= 0) = [];
+% f_ca_exdil(xi_ca_exdil <= 0) = [];
+% xi_ca_exdil(xi_ca_exdil <= 0) = [];
+% f_ca_excol(xi_ca_excol <= 0) = [];
+% xi_ca_excol(xi_ca_excol <= 0) = [];
+% 
+% scale32 = -0.075;
+% 
+% plot(scale32 * f_ca_lal_1 + 0.7, xi_ca_lal_1, 'Color', hex2rgb('#8D493A'),...
+%     'LineWidth', 1.25)
+% fill([scale32 * f_ca_lal_1 + 0.7, 0.7 * ones(size(f_ca_lal_1))],...
+%      [xi_ca_lal_1, fliplr(xi_ca_lal_1)], hex2rgb('#DC8686'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale32 * f_ca_hal_1 + 1.7, xi_ca_hal_1, 'Color', hex2rgb('#537188'),...
+%     'LineWidth', 1.25)
+% fill([scale32 * f_ca_hal_1 + 1.7, 1.7 * ones(size(f_ca_hal_1))],...
+%      [xi_ca_hal_1, fliplr(xi_ca_hal_1)], hex2rgb('#7EACB5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale32 * f_ca_exdil + 2.7, xi_ca_exdil, 'Color', hex2rgb('#8174A0'),...
+%     'LineWidth', 1.25)
+% fill([scale32 * f_ca_exdil + 2.7, 2.7 * ones(size(f_ca_exdil))],...
+%      [xi_ca_exdil, fliplr(xi_ca_exdil)], hex2rgb('#A888B5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale32 * f_ca_excol + 3.7, xi_ca_excol, 'Color', hex2rgb('#659287'),...
+%     'LineWidth', 1.25)
+% fill([scale32 * f_ca_excol + 3.7, 3.7 * ones(size(f_ca_excol))],...
+%      [xi_ca_excol, fliplr(xi_ca_excol)], hex2rgb('#B1C29E'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-% Compute kernel density estimate for each condition
-[f_ca_lal_1, xi_ca_lal_1] =...
-    ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).ca));
-[f_ca_hal_1, xi_ca_hal_1] =...
-    ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).ca));
-[f_ca_exdil, xi_ca_exdil] =...
-    ksdensity(cat(1, Aggs_exdil.ca));
-[f_ca_excol, xi_ca_excol] =...
-    ksdensity(cat(1, Aggs_excol.ca));
-
-% to avoid issue with log scale in y axis
-f_ca_lal_1(xi_ca_lal_1 <= 0) = [];
-xi_ca_lal_1(xi_ca_lal_1 <= 0) = [];
-f_ca_hal_1(xi_ca_hal_1 <= 0) = [];
-xi_ca_hal_1(xi_ca_hal_1 <= 0) = [];
-f_ca_exdil(xi_ca_exdil <= 0) = [];
-xi_ca_exdil(xi_ca_exdil <= 0) = [];
-f_ca_excol(xi_ca_excol <= 0) = [];
-xi_ca_excol(xi_ca_excol <= 0) = [];
-
-scale32 = -0.075;
-
-plot(scale32 * f_ca_lal_1 + 0.7, xi_ca_lal_1, 'Color', hex2rgb('#8D493A'),...
-    'LineWidth', 1.25)
-fill([scale32 * f_ca_lal_1 + 0.7, 0.7 * ones(size(f_ca_lal_1))],...
-     [xi_ca_lal_1, fliplr(xi_ca_lal_1)], hex2rgb('#DC8686'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale32 * f_ca_hal_1 + 1.7, xi_ca_hal_1, 'Color', hex2rgb('#537188'),...
-    'LineWidth', 1.25)
-fill([scale32 * f_ca_hal_1 + 1.7, 1.7 * ones(size(f_ca_hal_1))],...
-     [xi_ca_hal_1, fliplr(xi_ca_hal_1)], hex2rgb('#7EACB5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale32 * f_ca_exdil + 2.7, xi_ca_exdil, 'Color', hex2rgb('#8174A0'),...
-    'LineWidth', 1.25)
-fill([scale32 * f_ca_exdil + 2.7, 2.7 * ones(size(f_ca_exdil))],...
-     [xi_ca_exdil, fliplr(xi_ca_exdil)], hex2rgb('#A888B5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale32 * f_ca_excol + 3.7, xi_ca_excol, 'Color', hex2rgb('#659287'),...
-    'LineWidth', 1.25)
-fill([scale32 * f_ca_excol + 3.7, 3.7 * ones(size(f_ca_excol))],...
-     [xi_ca_excol, fliplr(xi_ca_excol)], hex2rgb('#B1C29E'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015])
-ylabel('$c_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-xlim([0.3, 4.3])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 14,...
+    'TickLength', [0.02 0.02])
+ylabel('$c_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 18)
+% xlim([0.3, 4.3])
 ylim([0, 1])
 
 %% optical depth distribution
@@ -757,58 +770,58 @@ set(upwhisker33, 'linestyle', '-');
 lowwhisker33 = findobj(gca, 'type', 'line','tag', 'Lower Whisker');
 set(lowwhisker33, 'linestyle', '-');
 
-hold on
+% hold on
+% 
+% % Compute kernel density estimate for each condition
+% [f_za_lal_1, xi_za_lal_1] =...
+%     ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).zbar_opt));
+% [f_za_hal_1, xi_za_hal_1] =...
+%     ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).zbar_opt));
+% [f_za_exdil, xi_za_exdil] =...
+%     ksdensity(cat(1, Aggs_exdil.zbar_opt));
+% [f_za_excol, xi_za_excol] =...
+%     ksdensity(cat(1, Aggs_excol.zbar_opt));
+% 
+% % to avoid issue with log scale in y axis
+% f_za_lal_1(xi_za_lal_1 <= 0) = [];
+% xi_za_lal_1(xi_za_lal_1 <= 0) = [];
+% f_za_hal_1(xi_za_hal_1 <= 0) = [];
+% xi_za_hal_1(xi_za_hal_1 <= 0) = [];
+% f_za_exdil(xi_za_exdil <= 0) = [];
+% xi_za_exdil(xi_za_exdil <= 0) = [];
+% f_za_excol(xi_za_excol <= 0) = [];
+% xi_za_excol(xi_za_excol <= 0) = [];
+% 
+% scale33 = -0.04;
+% 
+% plot(scale33 * f_za_lal_1 + 0.7, xi_za_lal_1, 'Color', hex2rgb('#8D493A'),...
+%     'LineWidth', 1.25)
+% fill([scale33 * f_za_lal_1 + 0.7, 0.7 * ones(size(f_za_lal_1))],...
+%      [xi_za_lal_1, fliplr(xi_za_lal_1)], hex2rgb('#DC8686'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale33 * f_za_hal_1 + 1.7, xi_za_hal_1, 'Color', hex2rgb('#537188'),...
+%     'LineWidth', 1.25)
+% fill([scale33 * f_za_hal_1 + 1.7, 1.7 * ones(size(f_za_hal_1))],...
+%      [xi_za_hal_1, fliplr(xi_za_hal_1)], hex2rgb('#7EACB5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale33 * f_za_exdil + 2.7, xi_za_exdil, 'Color', hex2rgb('#8174A0'),...
+%     'LineWidth', 1.25)
+% fill([scale33 * f_za_exdil + 2.7, 2.7 * ones(size(f_za_exdil))],...
+%      [xi_za_exdil, fliplr(xi_za_exdil)], hex2rgb('#A888B5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale33 * f_za_excol + 3.7, xi_za_excol, 'Color', hex2rgb('#659287'),...
+%     'LineWidth', 1.25)
+% fill([scale33 * f_za_excol + 3.7, 3.7 * ones(size(f_za_excol))],...
+%      [xi_za_excol, fliplr(xi_za_excol)], hex2rgb('#B1C29E'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-% Compute kernel density estimate for each condition
-[f_za_lal_1, xi_za_lal_1] =...
-    ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).zbar_opt));
-[f_za_hal_1, xi_za_hal_1] =...
-    ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).zbar_opt));
-[f_za_exdil, xi_za_exdil] =...
-    ksdensity(cat(1, Aggs_exdil.zbar_opt));
-[f_za_excol, xi_za_excol] =...
-    ksdensity(cat(1, Aggs_excol.zbar_opt));
-
-% to avoid issue with log scale in y axis
-f_za_lal_1(xi_za_lal_1 <= 0) = [];
-xi_za_lal_1(xi_za_lal_1 <= 0) = [];
-f_za_hal_1(xi_za_hal_1 <= 0) = [];
-xi_za_hal_1(xi_za_hal_1 <= 0) = [];
-f_za_exdil(xi_za_exdil <= 0) = [];
-xi_za_exdil(xi_za_exdil <= 0) = [];
-f_za_excol(xi_za_excol <= 0) = [];
-xi_za_excol(xi_za_excol <= 0) = [];
-
-scale33 = -0.04;
-
-plot(scale33 * f_za_lal_1 + 0.7, xi_za_lal_1, 'Color', hex2rgb('#8D493A'),...
-    'LineWidth', 1.25)
-fill([scale33 * f_za_lal_1 + 0.7, 0.7 * ones(size(f_za_lal_1))],...
-     [xi_za_lal_1, fliplr(xi_za_lal_1)], hex2rgb('#DC8686'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale33 * f_za_hal_1 + 1.7, xi_za_hal_1, 'Color', hex2rgb('#537188'),...
-    'LineWidth', 1.25)
-fill([scale33 * f_za_hal_1 + 1.7, 1.7 * ones(size(f_za_hal_1))],...
-     [xi_za_hal_1, fliplr(xi_za_hal_1)], hex2rgb('#7EACB5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale33 * f_za_exdil + 2.7, xi_za_exdil, 'Color', hex2rgb('#8174A0'),...
-    'LineWidth', 1.25)
-fill([scale33 * f_za_exdil + 2.7, 2.7 * ones(size(f_za_exdil))],...
-     [xi_za_exdil, fliplr(xi_za_exdil)], hex2rgb('#A888B5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale33 * f_za_excol + 3.7, xi_za_excol, 'Color', hex2rgb('#659287'),...
-    'LineWidth', 1.25)
-fill([scale33 * f_za_excol + 3.7, 3.7 * ones(size(f_za_excol))],...
-     [xi_za_excol, fliplr(xi_za_excol)], hex2rgb('#B1C29E'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015])
-ylabel('$z_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-xlim([0.3, 4.3])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 14,...
+    'TickLength', [0.02 0.02])
+ylabel('$z_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 18)
+% xlim([0.3, 4.3])
 ylim([0.1, 0.71])
 
 %% optical sharpness distribution
@@ -851,71 +864,71 @@ set(upwhisker34, 'linestyle', '-');
 lowwhisker34 = findobj(gca, 'type', 'line','tag', 'Lower Whisker');
 set(lowwhisker34, 'linestyle', '-');
 
-hold on
+% hold on
+% 
+% % Compute kernel density estimate for each condition
+% [f_sa_lal_1, xi_sa_lal_1] =...
+%     ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).sbar_opt));
+% [f_sa_hal_1, xi_sa_hal_1] =...
+%     ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).sbar_opt));
+% [f_sa_exdil, xi_sa_exdil] =...
+%     ksdensity(cat(1, Aggs_exdil.sbar_opt));
+% [f_sa_excol, xi_sa_excol] =...
+%     ksdensity(cat(1, Aggs_excol.sbar_opt));
+% 
+% % to avoid issue with log scale in y axis
+% f_sa_lal_1(xi_sa_lal_1 <= 0) = [];
+% xi_sa_lal_1(xi_sa_lal_1 <= 0) = [];
+% f_sa_hal_1(xi_sa_hal_1 <= 0) = [];
+% xi_sa_hal_1(xi_sa_hal_1 <= 0) = [];
+% f_sa_exdil(xi_sa_exdil <= 0) = [];
+% xi_sa_exdil(xi_sa_exdil <= 0) = [];
+% f_sa_excol(xi_sa_excol <= 0) = [];
+% xi_sa_excol(xi_sa_excol <= 0) = [];
+% 
+% scale34 = -0.12;
+% 
+% plot(scale34 * f_sa_lal_1 + 0.7, xi_sa_lal_1, 'Color', hex2rgb('#8D493A'),...
+%     'LineWidth', 1.25)
+% fill([scale34 * f_sa_lal_1 + 0.7, 0.7 * ones(size(f_sa_lal_1))],...
+%      [xi_sa_lal_1, fliplr(xi_sa_lal_1)], hex2rgb('#DC8686'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale34 * f_sa_hal_1 + 1.7, xi_sa_hal_1, 'Color', hex2rgb('#537188'),...
+%     'LineWidth', 1.25)
+% fill([scale34 * f_sa_hal_1 + 1.7, 1.7 * ones(size(f_sa_hal_1))],...
+%      [xi_sa_hal_1, fliplr(xi_sa_hal_1)], hex2rgb('#7EACB5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale34 * f_sa_exdil + 2.7, xi_sa_exdil, 'Color', hex2rgb('#8174A0'),...
+%     'LineWidth', 1.25)
+% fill([scale34 * f_sa_exdil + 2.7, 2.7 * ones(size(f_sa_exdil))],...
+%      [xi_sa_exdil, fliplr(xi_sa_exdil)], hex2rgb('#A888B5'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
+% 
+% plot(scale34 * f_sa_excol + 3.7, xi_sa_excol, 'Color', hex2rgb('#659287'),...
+%     'LineWidth', 1.25)
+% fill([scale34 * f_sa_excol + 3.7, 3.7 * ones(size(f_sa_excol))],...
+%      [xi_sa_excol, fliplr(xi_sa_excol)], hex2rgb('#B1C29E'),...
+%      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
-% Compute kernel density estimate for each condition
-[f_sa_lal_1, xi_sa_lal_1] =...
-    ksdensity(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).sbar_opt));
-[f_sa_hal_1, xi_sa_hal_1] =...
-    ksdensity(cat(1, Aggs_hal_1(cat(1, Aggs_hal_1.n_subagg) > 0).sbar_opt));
-[f_sa_exdil, xi_sa_exdil] =...
-    ksdensity(cat(1, Aggs_exdil.sbar_opt));
-[f_sa_excol, xi_sa_excol] =...
-    ksdensity(cat(1, Aggs_excol.sbar_opt));
-
-% to avoid issue with log scale in y axis
-f_sa_lal_1(xi_sa_lal_1 <= 0) = [];
-xi_sa_lal_1(xi_sa_lal_1 <= 0) = [];
-f_sa_hal_1(xi_sa_hal_1 <= 0) = [];
-xi_sa_hal_1(xi_sa_hal_1 <= 0) = [];
-f_sa_exdil(xi_sa_exdil <= 0) = [];
-xi_sa_exdil(xi_sa_exdil <= 0) = [];
-f_sa_excol(xi_sa_excol <= 0) = [];
-xi_sa_excol(xi_sa_excol <= 0) = [];
-
-scale34 = -0.12;
-
-plot(scale34 * f_sa_lal_1 + 0.7, xi_sa_lal_1, 'Color', hex2rgb('#8D493A'),...
-    'LineWidth', 1.25)
-fill([scale34 * f_sa_lal_1 + 0.7, 0.7 * ones(size(f_sa_lal_1))],...
-     [xi_sa_lal_1, fliplr(xi_sa_lal_1)], hex2rgb('#DC8686'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale34 * f_sa_hal_1 + 1.7, xi_sa_hal_1, 'Color', hex2rgb('#537188'),...
-    'LineWidth', 1.25)
-fill([scale34 * f_sa_hal_1 + 1.7, 1.7 * ones(size(f_sa_hal_1))],...
-     [xi_sa_hal_1, fliplr(xi_sa_hal_1)], hex2rgb('#7EACB5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale34 * f_sa_exdil + 2.7, xi_sa_exdil, 'Color', hex2rgb('#8174A0'),...
-    'LineWidth', 1.25)
-fill([scale34 * f_sa_exdil + 2.7, 2.7 * ones(size(f_sa_exdil))],...
-     [xi_sa_exdil, fliplr(xi_sa_exdil)], hex2rgb('#A888B5'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-plot(scale34 * f_sa_excol + 3.7, xi_sa_excol, 'Color', hex2rgb('#659287'),...
-    'LineWidth', 1.25)
-fill([scale34 * f_sa_excol + 3.7, 3.7 * ones(size(f_sa_excol))],...
-     [xi_sa_excol, fliplr(xi_sa_excol)], hex2rgb('#B1C29E'),...
-     'FaceAlpha', 0.5, 'EdgeColor', 'none');
-
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 10,...
-    'TickLength', [0.015 0.015])
-ylabel('$s_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 14)
-xlim([0.3, 4.3])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 14,...
+    'TickLength', [0.02 0.02])
+ylabel('$s_\mathrm{a}$ [nm]', 'interpreter', 'latex', 'FontSize', 18)
+% xlim([0.3, 4.3])
 ylim([0.5, 2.75])
 
 %% n_hyb freqeuncy comparison subplot %%
 
 % initialize figure 3
 f4 = figure;
-f4.Position = [150, 150, 1500, 500];
+f4.Position = [150, 150, 1200, 600];
 set(f4, 'color', 'white');
 
 n_subagg_0 = {cat(1,Aggs_lal_1.n_subagg), cat(1,Aggs_hal_1.n_subagg),...
     cat(1,Aggs_exdil.n_subagg), cat(1,Aggs_excol.n_subagg)};
 
-tt4 = tiledlayout(1, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
+tt4 = tiledlayout(1, 2, 'Padding', 'loose', 'TileSpacing', 'compact');
 
 xlbl4 = [strcat('Lo-Aglom', {' '}, '(n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
     strcat('Mod-Colaps', {' '},  '(n =', {' '}, num2str(n_aggs_tot(2)), ')'),...
@@ -943,7 +956,7 @@ n_hyb = 100 * [nnz(n_subagg{1} == 1),...
     nnz(n_subagg{3} == 1),...
     nnz(n_subagg{3} == 2),...
     nnz((n_subagg{3} >= 3) & (n_subagg{3} <= 5)),...
-    nnz((n_subagg{3} >= 5) & (n_subagg{3} <= 10)),...
+    nnz((n_subagg{3} >= 6) & (n_subagg{3} <= 10)),...
     nnz(n_subagg{3} > 10);...
     nnz(n_subagg{4} == 1),...
     nnz(n_subagg{4} == 2),...
@@ -959,21 +972,49 @@ b41 = bar(condition4, n_hyb,'stacked');
 clr41 = hex2rgb({'#C96868', '#FADFA1', '#7EACB5', '#8174A0', '#574964'});
 
 for i = 1 : size(n_hyb,2)
-    b41(i).BarWidth = 0.3;
+    b41(i).BarWidth = 0.4;
     b41(i).FaceColor = clr41(i,:);
 end
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.01 0.01])
-ylabel('Frequency [$\%$]', 'interpreter', 'latex', 'FontSize', 14)
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
+    'TickLength', [0.02 0.02])
+ylabel('Frequency [$\%$]', 'interpreter', 'latex', 'FontSize', 22)
+yticks([0 20 40 60 80 100])
 ylim([0 100])
 
 lgd41 = legend({'$n_\mathrm{hyb} = 1$', '$n_\mathrm{hyb} = 2$',...
     '$3 \le n_\mathrm{hyb} \le 5$', '$6 \le n_\mathrm{hyb} \le 10$',...
-    '$n_\mathrm{hyb} > 10$'}, 'interpreter', 'latex', 'FontSize', 12,...
+    '$n_\mathrm{hyb} > 10$'}, 'interpreter', 'latex', 'FontSize', 18,...
     'location', 'northoutside', 'orientation', 'horizontal',...
-    'NumColumns', 5);
-lgd41.ItemTokenSize = [10, 10];
+    'NumColumns', 2);
+lgd41.ItemTokenSize = [15, 15];
+
+% manually positioned downward arrows on n_hyb = 1 in left panel
+% adjust these to visually align with bar groups
+
+xBarPos = [1.13, 2.04, 3, 4];  % tweak as needed for alignment
+
+% axis and position
+ax4_1 = gca;
+axPos = ax4_1.Position;
+ylim4 = ax4_1.YLim;
+
+for groupIdx = 1:2
+    xBar = xBarPos(groupIdx);
+    yBarTop = b41(1).YData(groupIdx);  % top of red bar
+
+    % normalized figure coordinates
+    xFig = axPos(1) + (xBar - 0.5)/4 * axPos(3);  % assuming xlim = [0.5, 4.5]
+    yFig = axPos(2) + (yBarTop - ylim4(1)) / diff(ylim4) * axPos(4);
+
+    dy = 0.05;  % arrow length in normalized units
+
+    annotation('textarrow', [xFig xFig], [yFig yFig - dy], ...
+        'String', '', ...
+        'HeadStyle', 'plain', ...        
+        'LineWidth', 2.0, ...            
+        'Color', [0 0 0]);               
+end
 
 nexttile
 
@@ -1019,19 +1060,20 @@ b42 = bar(condition4, r_colaps,'stacked');
 clr42 = hex2rgb({'#DEAA79', '#FFE6A9', '#B1C29E', '#659287', '#3A4D39'});
 
 for i = 1 : size(r_colaps,2)
-    b42(i).BarWidth = 0.3;
+    b42(i).BarWidth = 0.4;
     b42(i).FaceColor = clr42(i,:);
 end
 
-set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 11,...
-    'TickLength', [0.01 0.01])
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 18,...
+    'TickLength', [0.02 0.02])
+yticks([0 20 40 60 80 100])
 ylim([0 100])
 
 lgd42 = legend({'$r_\mathrm{clp} = 0$', '$0 < r_\mathrm{clp} < 0.33$',...
     '$0.33 \le r_\mathrm{clp} \le 0.67$', '$0.67 < r_\mathrm{clp} < 1$',...
-    '$r_\mathrm{clp} = 1$'}, 'interpreter', 'latex', 'FontSize', 12,...
-    'location', 'northoutside', 'orientation', 'horizontal', 'NumColumns', 5);
-lgd42.ItemTokenSize = [10, 10];
+    '$r_\mathrm{clp} = 1$'}, 'interpreter', 'latex', 'FontSize', 18,...
+    'location', 'northoutside', 'orientation', 'horizontal', 'NumColumns', 2);
+lgd42.ItemTokenSize = [15, 15];
 
 %% dpp vs. da as a function of n_hyb, not experimental case %%
 
