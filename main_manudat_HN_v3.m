@@ -290,10 +290,10 @@ clear vars varname newVarName
 
 % initialize figure 2
 f2 = figure;
-f2.Position = [100, 100, 1400, 500];
+f2.Position = [100, 0, 550, 1300];
 set(f2, 'color', 'white');
 
-tt2 = tiledlayout(1, 3, 'Padding', 'loose', 'TileSpacing', 'loose');
+tt2 = tiledlayout(3, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
 nexttile
 
 % strcat('Low agglom.', string(newline), '(n =', {' '}, num2str(n_aggs_tot(1)), ')'),...
@@ -385,8 +385,8 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
 ylabel('$d_\mathrm{pp}^\mathrm{(i)}$ [nm]', 'interpreter', 'latex',...
     'FontSize', 24)
 xlim([0.3, 3.3])
-ylim([3, 80])
-yticks(linspace(10,70,7))
+ylim([3, 85])
+yticks([5 10 20 40 80])
 
 %% avereage dpp within aggregates comparison subplot %%
 
@@ -504,7 +504,7 @@ sigma_ens_exdil = morph.geostd(dpp_ens_exdil);
 %     'latex', 'FontSize', 10, 'location', 'northeast')
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
-    'TickLength', [0.02 0.02], 'YScale', 'log')
+    'TickLength', [0.02 0.02])
 yticks([1.2 1.3 1.4 1.5 1.6])
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
 ylim([1.15, 1.65])
@@ -513,7 +513,7 @@ ylim([1.15, 1.65])
 
 % initialize figure 2
 f3 = figure;
-f3.Position = [100, 50, 900, 900];
+f3.Position = [150, 50, 900, 900];
 set(f3, 'color', 'white');
 
 tt3 = tiledlayout(2, 2, 'Padding', 'loose', 'TileSpacing', 'compact');
@@ -922,7 +922,7 @@ ylim([0.5, 2.75])
 
 % initialize figure 3
 f4 = figure;
-f4.Position = [150, 150, 1200, 600];
+f4.Position = [200, 150, 1200, 600];
 set(f4, 'color', 'white');
 
 n_subagg_0 = {cat(1,Aggs_lal_1.n_subagg), cat(1,Aggs_hal_1.n_subagg),...
@@ -1079,7 +1079,7 @@ lgd42.ItemTokenSize = [15, 15];
 
 % initialize figure 5
 f5 = figure;
-f5.Position = [200, 200, 550, 600];
+f5.Position = [250, 200, 550, 600];
 set(f5, 'color', 'white')
 
 plt5 = cell(5,1); % initialize dpp vs da plots per n_hyb
