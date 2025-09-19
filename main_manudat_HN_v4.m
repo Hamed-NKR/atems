@@ -5,10 +5,13 @@ warning('off')
 
 %% universal parameters %%
 
-area_threshold = 1; % criteria on whether weighting is applied to...
-    % ...correct primary particle bias
+
 n_rndsmp = 5000; % number of random points for resampling needed to...
     % ...generate boxplots of ensemble primary particle distributions
+
+% Logistic switch parameter
+T = 1.1;   % threshold coverage
+k = 0.05;   % bandwidth of transition
 
 %% initialize dpp vs. da figure %%
 
@@ -86,12 +89,14 @@ for i = 1 : n_agg_lal_1
         da_i_lal = Aggs_lal_1(id_agg_lal_1(i)).da;
         cov_i_lal = sum(dpp_manu_lal_1{i}.^2) / (da_i_lal^2);
         
-        if cov_i_lal < area_threshold
-            w_i_lal = 1 ./ (dpp_manu_lal_1{i}.^2); % apply correction
-        else
-            w_i_lal = ones(size(dpp_manu_lal_1{i})); % no weighting
-        end
-        
+        % if cov_i_lal < T
+        %     w_i_lal = 1 ./ (dpp_manu_lal_1{i}.^2); % apply correction
+        % else
+        %     w_i_lal = ones(size(dpp_manu_lal_1{i})); % no weighting
+        % end
+        alpha_i = 1 - 1 ./ (1 + exp(-(cov_i_lal - T)/k));
+        w_i_lal = (1 ./ (dpp_manu_lal_1{i}.^2)) .^ alpha_i;
+
         [dbarpp_manu_lal_1(i), sigmapp_manu_lal_1(i)] = ...
             morph.geomstats(dpp_manu_lal_1{i}, w_i_lal);
         
@@ -165,8 +170,10 @@ for i = 1 : n_agg_hal_1
 
         da_i_hal  = Aggs_hal_1(id_agg_hal_1(i)).da;
         cov_i_hal = sum(dpp_manu_hal_1{i}.^2) / (da_i_hal^2);
-        w_i_hal = (cov_i_hal < area_threshold) .* (1./(dpp_manu_hal_1{i}.^2)) +...
-            (cov_i_hal >= area_threshold) .* 1;
+        % w_i_hal = (cov_i_hal < T) .* (1./(dpp_manu_hal_1{i}.^2)) +...
+        %     (cov_i_hal >= T) .* 1;
+        alpha_i = 1 - 1 ./ (1 + exp(-(cov_i_hal - T)/k));
+        w_i_hal = (1 ./ (dpp_manu_hal_1{i}.^2)) .^ alpha_i;        
         [dbarpp_manu_hal_1(i), sigmapp_manu_hal_1(i)] =...
             morph.geomstats(dpp_manu_hal_1{i}, w_i_hal);
         
@@ -241,8 +248,10 @@ for i = 1 : n_agg_exdil
 
         da_i_exdil  = Aggs_exdil(id_agg_exdil(i)).da;
         cov_i_exdil = sum(dpp_manu_exdil{i}.^2) / (da_i_exdil^2);
-        w_i_exdil = (cov_i_exdil < area_threshold) .* (1./(dpp_manu_exdil{i}.^2)) +...
-            (cov_i_exdil >= area_threshold) .* 1;
+        % w_i_exdil = (cov_i_exdil < T) .* (1./(dpp_manu_exdil{i}.^2)) +...
+        %     (cov_i_exdil >= T) .* 1;
+        alpha_i = 1 - 1 ./ (1 + exp(-(cov_i_exdil - T)/k));
+        w_i_exdil = (1 ./ (dpp_manu_exdil{i}.^2)) .^ alpha_i;
         [dbarpp_manu_exdil(i), sigmapp_manu_exdil(i)] =...
             morph.geomstats(dpp_manu_exdil{i}, w_i_exdil);
 
@@ -369,17 +378,27 @@ da_parent_exdil = repelem(cat(1, Aggs_exdil(id_agg_exdil).da), npp_manu_exdil, 1
 covvec_exdil = repelem(cov_ens_exdil, npp_manu_exdil, 1);
 
 % ensemble weights: (A_agg / A_pp) = (da_parent.^2 ./ dpp.^2)
-w_lal = ones(size(dpp_ens_lal_1));
-mask = covvec_lal < area_threshold;
-w_lal(mask) = (da_parent_lal(mask).^2) ./ (dpp_ens_lal_1(mask).^2);
 
-w_hal = ones(size(dpp_ens_hal_1));
-mask = covvec_hal < area_threshold;
-w_hal(mask) = (da_parent_hal(mask).^2) ./ (dpp_ens_hal_1(mask).^2);
+% w_lal = ones(size(dpp_ens_lal_1));
+% mask = covvec_lal < T;
+% w_lal(mask) = (da_parent_lal(mask).^2) ./ (dpp_ens_lal_1(mask).^2);
+% 
+% w_hal = ones(size(dpp_ens_hal_1));
+% mask = covvec_hal < T;
+% w_hal(mask) = (da_parent_hal(mask).^2) ./ (dpp_ens_hal_1(mask).^2);
+% 
+% w_exdil = ones(size(dpp_ens_exdil));
+% mask = covvec_exdil < T;
+% w_exdil(mask) = (da_parent_exdil(mask).^2) ./ (dpp_ens_exdil(mask).^2);
 
-w_exdil = ones(size(dpp_ens_exdil));
-mask = covvec_exdil < area_threshold;
-w_exdil(mask) = (da_parent_exdil(mask).^2) ./ (dpp_ens_exdil(mask).^2);
+alpha_lal = 1 - 1 ./ (1 + exp(-(covvec_lal - T)/k));
+w_lal = ((da_parent_lal.^2) ./ (dpp_ens_lal_1.^2)) .^ alpha_lal;
+
+alpha_hal = 1 - 1 ./ (1 + exp(-(covvec_hal - T)/k));
+w_hal = ((da_parent_hal.^2) ./ (dpp_ens_hal_1.^2)) .^ alpha_hal;
+
+alpha_exdil = 1 - 1 ./ (1 + exp(-(covvec_exdil - T)/k));
+w_exdil = ((da_parent_exdil.^2) ./ (dpp_ens_exdil.^2)) .^ alpha_exdil;
 
 % weighted ensemble GM & GSD
 [gm_lal, gsd_lal] = morph.geomstats(dpp_ens_lal_1, w_lal);
@@ -478,7 +497,7 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
 ylabel('$d_\mathrm{pp}^\mathrm{(i)}$ [nm]', 'interpreter', 'latex',...
     'FontSize', 24)
 xlim([0.3, 3.3])
-ylim([3.5, 60])
+ylim([5, 55])
 yticks([5 10 20 40 80])
 
 %% avereage dpp within aggregates comparison subplot %%
@@ -543,7 +562,7 @@ dbarpp_ens_exdil = geomean(dpp_ens_exdil);
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
     'TickLength', [0.015 0.015])
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 24)
-ylim([8, 25])
+ylim([8, 24])
 
 %% GSD of pp within aggregates comparison subplot %%
 
@@ -600,7 +619,7 @@ set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
     'TickLength', [0.015 0.015])
 yticks([1.2 1.3 1.4 1.5 1.6])
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
-ylim([1.18, 1.64])
+ylim([1.11, 1.62])
 
 %% Summary table for Figure 2 (Geometric mean, GSD & 95% CI) %%
 % all CIs are log-space normal approximations.
