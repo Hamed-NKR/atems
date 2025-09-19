@@ -25,7 +25,7 @@ fname_agg_lal_1 = '19AUG24_LAL_End_Slider';
 fdir_agg_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ATEMS_Area';
 fname_pp_lal_1 = 'PFA_ET+NIT_LAL_19AUG24_End';
 fdir_pp_lal_1 = 'D:\Hamed\CND\PhD\TEM\PFA_Final_ET+NIT\SimMag\01OCT24_PFA_ET+NIT_LAL_19AUG24_End\ImageJ_Primaries\CSV';
-id_agg_lal_1 = [1:27, 39, 42, 44:64];
+id_agg_lal_1 = 1:64;
 
 fadd_agg_lal_1 = cell2mat(strcat(fdir_agg_lal_1, {'\'}, fname_agg_lal_1, '.mat'));
 load(fadd_agg_lal_1);

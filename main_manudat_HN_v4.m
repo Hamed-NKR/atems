@@ -3,6 +3,13 @@ clear
 close all
 warning('off')
 
+%% universal parameters %%
+
+area_threshold = 1; % criteria on whether weighting is applied to...
+    % ...correct primary particle bias
+n_rndsmp = 5000; % number of random points for resampling needed to...
+    % ...generate boxplots of ensemble primary particle distributions
+
 %% initialize dpp vs. da figure %%
 
 f1 = figure;
@@ -75,9 +82,19 @@ for i = 1 : n_agg_lal_1
         
         dpp_manu_lal_1{i} = sqrt(4 * pp_manu_lal_1.Area(2:end) / pi);
 
-        [dbarpp_manu_lal_1(i), sigmapp_manu_lal_1(i)] =...
-            morph.weighted_geomean(dpp_manu_lal_1{i},...
-            dpp_manu_lal_1{i}.^(-2));
+        % coverage ratio = (sum PP areas) / (agg area) ; constants cancel on d^2
+        da_i_lal = Aggs_lal_1(id_agg_lal_1(i)).da;
+        cov_i_lal = sum(dpp_manu_lal_1{i}.^2) / (da_i_lal^2);
+        
+        if cov_i_lal < area_threshold
+            w_i_lal = 1 ./ (dpp_manu_lal_1{i}.^2); % apply correction
+        else
+            w_i_lal = ones(size(dpp_manu_lal_1{i})); % no weighting
+        end
+        
+        [dbarpp_manu_lal_1(i), sigmapp_manu_lal_1(i)] = ...
+            morph.geomstats(dpp_manu_lal_1{i}, w_i_lal);
+        
         npp_manu_lal_1(i) = length(dpp_manu_lal_1{i});
         
         plt_lal_1 = scatter(Aggs_lal_1(id_agg_lal_1(i)).da,...
@@ -146,9 +163,13 @@ for i = 1 : n_agg_hal_1
         
         dpp_manu_hal_1{i} = sqrt(4 * pp_manu_hal_1.Area(2:end) / pi);
 
+        da_i_hal  = Aggs_hal_1(id_agg_hal_1(i)).da;
+        cov_i_hal = sum(dpp_manu_hal_1{i}.^2) / (da_i_hal^2);
+        w_i_hal = (cov_i_hal < area_threshold) .* (1./(dpp_manu_hal_1{i}.^2)) +...
+            (cov_i_hal >= area_threshold) .* 1;
         [dbarpp_manu_hal_1(i), sigmapp_manu_hal_1(i)] =...
-            morph.weighted_geomean(dpp_manu_hal_1{i},...
-            dpp_manu_hal_1{i}.^(-2));
+            morph.geomstats(dpp_manu_hal_1{i}, w_i_hal);
+        
         npp_manu_hal_1(i) = length(dpp_manu_hal_1{i});
         
         figure(f1);
@@ -218,9 +239,13 @@ for i = 1 : n_agg_exdil
         
         dpp_manu_exdil{i} = sqrt(4 * pp_manu_exdil.Area(2:end) / pi);
 
+        da_i_exdil  = Aggs_exdil(id_agg_exdil(i)).da;
+        cov_i_exdil = sum(dpp_manu_exdil{i}.^2) / (da_i_exdil^2);
+        w_i_exdil = (cov_i_exdil < area_threshold) .* (1./(dpp_manu_exdil{i}.^2)) +...
+            (cov_i_exdil >= area_threshold) .* 1;
         [dbarpp_manu_exdil(i), sigmapp_manu_exdil(i)] =...
-            morph.weighted_geomean(dpp_manu_exdil{i},...
-            dpp_manu_exdil{i}.^(-2));
+            morph.geomstats(dpp_manu_exdil{i}, w_i_exdil);
+
         npp_manu_exdil(i) = length(dpp_manu_exdil{i});
         
         figure(f1);
@@ -293,7 +318,7 @@ clear vars varname newVarName
 
 % initialize figure 2
 f2 = figure;
-f2.Position = [100, 0, 550, 1300];
+f2.Position = [100, 0, 850, 1300];
 set(f2, 'color', 'white');
 
 tt2 = tiledlayout(3, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
@@ -308,19 +333,60 @@ dpp_ens_lal_1 = cat(1, cell2mat(dpp_manu_lal_1));
 dpp_ens_hal_1 = cat(1, cell2mat(dpp_manu_hal_1));
 dpp_ens_exdil = cat(1, cell2mat(dpp_manu_exdil));
 
-% apply weights (= inverse pixel area or 1./d.^2) to resolve bias in...
-    % ...sizing of larger primary particles
-w_lal = repelem(cat(1, Aggs_lal_1(cat(1, Aggs_lal_1.n_subagg) > 0).da),...
-    npp_manu_lal_1, 1) ./ (dpp_ens_lal_1.^2);
-w_hal = repelem(cat(1, Aggs_hal_1(id_agg_hal_1).da),...
-    npp_manu_hal_1, 1) ./ (dpp_ens_hal_1.^2);
-w_exdil = repelem(cat(1, Aggs_exdil(id_agg_exdil).da),...
-    npp_manu_exdil,1) ./ (dpp_ens_exdil.^2);
+%%% apply weights to resolve bias in sizing of larger primary particles
+
+% coverage per aggregate (PP area / agg area)
+cov_ens_lal = nan(n_agg_lal_1,1);
+for ii = 1 : n_agg_lal_1
+    if ~isempty(dpp_manu_lal_1{ii})
+        da_temp_ens = Aggs_lal_1(id_agg_lal_1(ii)).da;
+        cov_ens_lal(ii) = sum(dpp_manu_lal_1{ii}.^2) / (da_temp_ens^2);
+    end
+end
+
+cov_ens_hal = nan(n_agg_hal_1,1);
+for ii = 1 : n_agg_hal_1
+    if ~isempty(dpp_manu_hal_1{ii})
+        da_temp_ens = Aggs_hal_1(id_agg_hal_1(ii)).da;
+        cov_ens_hal(ii) = sum(dpp_manu_hal_1{ii}.^2) / (da_temp_ens^2);
+    end
+end
+
+cov_ens_exdil = nan(n_agg_exdil,1);
+for ii = 1 : n_agg_exdil
+    if ~isempty(dpp_manu_exdil{ii})
+        da_temp_ens = Aggs_exdil(id_agg_exdil(ii)).da;
+        cov_ens_exdil(ii) = sum(dpp_manu_exdil{ii}.^2) / (da_temp_ens^2);
+    end
+end
+
+% expand parent agg diameters and coverage to per-primary particle vectors
+da_parent_lal = repelem(cat(1, Aggs_lal_1(id_agg_lal_1).da), npp_manu_lal_1, 1);
+covvec_lal = repelem(cov_ens_lal, npp_manu_lal_1, 1);
+da_parent_hal = repelem(cat(1, Aggs_hal_1(id_agg_hal_1).da), npp_manu_hal_1, 1);
+covvec_hal = repelem(cov_ens_hal, npp_manu_hal_1, 1);
+da_parent_exdil = repelem(cat(1, Aggs_exdil(id_agg_exdil).da), npp_manu_exdil, 1);
+covvec_exdil = repelem(cov_ens_exdil, npp_manu_exdil, 1);
+
+% ensemble weights: (A_agg / A_pp) = (da_parent.^2 ./ dpp.^2)
+w_lal = ones(size(dpp_ens_lal_1));
+mask = covvec_lal < area_threshold;
+w_lal(mask) = (da_parent_lal(mask).^2) ./ (dpp_ens_lal_1(mask).^2);
+
+w_hal = ones(size(dpp_ens_hal_1));
+mask = covvec_hal < area_threshold;
+w_hal(mask) = (da_parent_hal(mask).^2) ./ (dpp_ens_hal_1(mask).^2);
+
+w_exdil = ones(size(dpp_ens_exdil));
+mask = covvec_exdil < area_threshold;
+w_exdil(mask) = (da_parent_exdil(mask).^2) ./ (dpp_ens_exdil(mask).^2);
 
 % weighted ensemble GM & GSD
-[gm_lal, gsd_lal]  = morph.weighted_geomean(dpp_ens_lal_1, w_lal);
-[gm_hal, gsd_hal]  = morph.weighted_geomean(dpp_ens_hal_1, w_hal);
-[gm_exdil, gsd_exdil]= morph.weighted_geomean(dpp_ens_exdil, w_exdil);
+[gm_lal, gsd_lal] = morph.geomstats(dpp_ens_lal_1, w_lal);
+[gm_hal, gsd_hal] = morph.geomstats(dpp_ens_hal_1, w_hal);
+[gm_exdil, gsd_exdil] = morph.geomstats(dpp_ens_exdil, w_exdil);
+
+%%%
 
 % generate weights to correct ensemble particle sizing bias
 
@@ -336,8 +402,12 @@ condition21 = [repmat(xlbl21(1), n_pps_manu(1), 1);...
     repmat(xlbl21(3), n_pps_manu(3), 1)];
 condition21 = categorical(condition21, {xlbl21{1}, xlbl21{2}, xlbl21{3}});
 
-bp21 = boxplot([dpp_ens_lal_1; dpp_ens_hal_1; dpp_ens_exdil],...
-    condition21, 'Notch', 'on', 'Symbol', 'o', 'Widths', 0.25);
+% resample data with weights and pass to boxplot
+dpp_all = [dpp_ens_lal_1; dpp_ens_hal_1; dpp_ens_exdil];
+w_all = [w_lal(:); w_hal(:); w_exdil(:)];
+idx = randsample(numel(dpp_all), n_rndsmp, true, w_all/sum(w_all));
+bp21 = boxplot(dpp_all(idx), condition21(idx), 'Notch', 'on',...
+     'Symbol', 'o', 'Widths', 0.25);
 
 boxes21 = findobj(bp21, 'Tag', 'Box');
 patch(get(boxes21(1), 'XData'), get(boxes21(1), 'YData'),...
@@ -404,11 +474,11 @@ fill([scale21 * f_dpp_exdil + 2.7, 2.7 * ones(size(f_dpp_exdil))],...
      'FaceAlpha', 0.5, 'EdgeColor', 'none');
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
-    'TickLength', [0.02 0.02], 'YScale', 'log')
+    'TickLength', [0.015 0.015], 'YScale', 'log')
 ylabel('$d_\mathrm{pp}^\mathrm{(i)}$ [nm]', 'interpreter', 'latex',...
     'FontSize', 24)
 xlim([0.3, 3.3])
-ylim([3, 85])
+ylim([3.5, 60])
 yticks([5 10 20 40 80])
 
 %% avereage dpp within aggregates comparison subplot %%
@@ -471,9 +541,9 @@ dbarpp_ens_exdil = geomean(dpp_ens_exdil);
 %     'interpreter', 'latex', 'FontSize', 10, 'location', 'northeast')
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
-    'TickLength', [0.02 0.02])
+    'TickLength', [0.015 0.015])
 ylabel('$d_\mathrm{pp}$ [nm]', 'interpreter', 'latex', 'FontSize', 24)
-ylim([11.5, 29.5])
+ylim([8, 25])
 
 %% GSD of pp within aggregates comparison subplot %%
 
@@ -527,14 +597,67 @@ sigma_ens_exdil = morph.geostd(dpp_ens_exdil);
 %     'latex', 'FontSize', 10, 'location', 'northeast')
 
 set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 16,...
-    'TickLength', [0.02 0.02])
+    'TickLength', [0.015 0.015])
 yticks([1.2 1.3 1.4 1.5 1.6])
 ylabel('$\sigma_\mathrm{pp}$ [-]', 'interpreter', 'latex', 'FontSize', 24)
-ylim([1.15, 1.65])
+ylim([1.18, 1.64])
+
+%% Summary table for Figure 2 (Geometric mean, GSD & 95% CI) %%
+% all CIs are log-space normal approximations.
+
+% subplot 1: ensemble d_pp^(i) (weighted)
+[gm_ens_lal, gsd_ens_lal, ci_ens_lal] =...
+    morph.geomstats(dpp_ens_lal_1(:), w_lal(:));
+[gm_ens_hal, gsd_ens_hal, ci_ens_hal] =...
+    morph.geomstats(dpp_ens_hal_1(:), w_hal(:));
+[gm_ens_exdil, gsd_ens_exdil, ci_ens_exdil] =...
+    morph.geomstats(dpp_ens_exdil(:),  w_exdil(:));
+
+% subplot 2: per-aggregate mean d_pp (unweighted across aggregates)
+[gm_gmagg_lal, gsd_gmagg_lal, ci_gmagg_lal] =...
+    morph.geomstats(dbarpp_manu_lal_1);
+[gm_gmagg_hal, gsd_gmagg_hal, ci_gmagg_hal] =...
+    morph.geomstats(dbarpp_manu_hal_1);
+[gm_gmagg_exdil, gsd_gmagg_exdil, ci_gmagg_exdil] =...
+    morph.geomstats(dbarpp_manu_exdil);
+
+% subplot 3: per-aggregate sigma_pp (unweighted across aggregates)
+[gm_gsdagg_lal, gsd_gsdagg_lal, ci_gsdagg_lal] =...
+    morph.geomstats(sigmapp_manu_lal_1);
+[gm_gsdagg_hal, gsd_gsdagg_hal, ci_gsdagg_hal] =...
+    morph.geomstats(sigmapp_manu_hal_1);
+[gm_gsdagg_exdil, gsd_gsdagg_exdil, ci_gsdagg_exdil] =...
+    morph.geomstats(sigmapp_manu_exdil);
+
+% build tidy table comparing the three conditions (use row names as titles) ----
+RowNames = {'Lo-Aglom', 'Mod-Colaps', 'Hi-Aglom'};
+
+T_fig2 = table( ...
+    [gm_ens_lal;   gm_ens_hal;   gm_ens_exdil], ...
+    [gsd_ens_lal;  gsd_ens_hal;  gsd_ens_exdil], ...
+    [ci_ens_lal(1); ci_ens_hal(1); ci_ens_exdil(1)], ...
+    [ci_ens_lal(2); ci_ens_hal(2); ci_ens_exdil(2)], ...
+    [gm_gmagg_lal;  gm_gmagg_hal;  gm_gmagg_exdil], ...
+    [gsd_gmagg_lal; gsd_gmagg_hal; gsd_gmagg_exdil], ...
+    [ci_gmagg_lal(1); ci_gmagg_hal(1); ci_gmagg_exdil(1)], ...
+    [ci_gmagg_lal(2); ci_gmagg_hal(2); ci_gmagg_exdil(2)], ...
+    [gm_gsdagg_lal;   gm_gsdagg_hal;   gm_gsdagg_exdil], ...
+    [gsd_gsdagg_lal;  gsd_gsdagg_hal;  gsd_gsdagg_exdil], ...
+    [ci_gsdagg_lal(1); ci_gsdagg_hal(1); ci_gsdagg_exdil(1)], ...
+    [ci_gsdagg_lal(2); ci_gsdagg_hal(2); ci_gsdagg_exdil(2)], ...
+    'VariableNames', {...
+        'GM_dpp_Ens', 'GSD_dpp_Ens', 'CI95_lo_dpp_Ens', 'CI95_hi_dpp_Ens',...
+        'GM_dpp_GM', 'GSD_dpp_GM', 'CI95_lo_dpp_GM', 'CI95_hi_dpp_GM',...
+        'GM_dpp_GSD', 'GSD_dpp_GSD', 'CI95_lo_dpp_GSD', 'CI95_hi_dpp_GSD'},...
+    'RowNames', RowNames);
+
+disp(' ');
+disp('=== Figure 2 summary (Geometric mean, geometric std. dev., and 95% CI) ===');
+disp(T_fig2);
 
 %% da comparison subplot %%
 
-% initialize figure 2
+% initialize figure 3
 f3 = figure;
 f3.Position = [150, 50, 900, 900];
 set(f3, 'color', 'white');
