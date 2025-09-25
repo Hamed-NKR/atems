@@ -624,55 +624,115 @@ ylim([1.11, 1.62])
 %% Summary table for Figure 2 (Geometric mean, GSD & 95% CI) %%
 % all CIs are log-space normal approximations.
 
-% subplot 1: ensemble d_pp^(i) (weighted)
-[gm_ens_lal, gsd_ens_lal, ci_ens_lal] =...
-    morph.geomstats(dpp_ens_lal_1(:), w_lal(:));
-[gm_ens_hal, gsd_ens_hal, ci_ens_hal] =...
-    morph.geomstats(dpp_ens_hal_1(:), w_hal(:));
-[gm_ens_exdil, gsd_ens_exdil, ci_ens_exdil] =...
-    morph.geomstats(dpp_ens_exdil(:),  w_exdil(:));
+%% Summary table for Figure 2 (Ensemble variants by rows + aggregate summaries)
+% all CIs are log-space normal approximations.
 
-% subplot 2: per-aggregate mean d_pp (unweighted across aggregates)
-[gm_gmagg_lal, gsd_gmagg_lal, ci_gmagg_lal] =...
-    morph.geomstats(dbarpp_manu_lal_1);
-[gm_gmagg_hal, gsd_gmagg_hal, ci_gmagg_hal] =...
-    morph.geomstats(dbarpp_manu_hal_1);
-[gm_gmagg_exdil, gsd_gmagg_exdil, ci_gmagg_exdil] =...
-    morph.geomstats(dbarpp_manu_exdil);
+% ---------- 1) Build the three weighting modes for ENSEMBLE d_pp^(i) ----------
+% Unweighted
+w_lal_unw   = ones(size(dpp_ens_lal_1));
+w_hal_unw   = ones(size(dpp_ens_hal_1));
+w_exdil_unw = ones(size(dpp_ens_exdil));
 
-% subplot 3: per-aggregate sigma_pp (unweighted across aggregates)
-[gm_gsdagg_lal, gsd_gsdagg_lal, ci_gsdagg_lal] =...
-    morph.geomstats(sigmapp_manu_lal_1);
-[gm_gsdagg_hal, gsd_gsdagg_hal, ci_gsdagg_hal] =...
-    morph.geomstats(sigmapp_manu_hal_1);
-[gm_gsdagg_exdil, gsd_gsdagg_exdil, ci_gsdagg_exdil] =...
-    morph.geomstats(sigmapp_manu_exdil);
+% Hard threshold (A_agg/A_pp if coverage < T, else 1)
+w_lal_hard   = ones(size(dpp_ens_lal_1));
+mask         = covvec_lal < T;
+w_lal_hard(mask) = (da_parent_lal(mask).^2) ./ (dpp_ens_lal_1(mask).^2);
 
-% build tidy table comparing the three conditions (use row names as titles) ----
-RowNames = {'Lo-Aglom', 'Mod-Colaps', 'Hi-Aglom'};
+w_hal_hard   = ones(size(dpp_ens_hal_1));
+mask         = covvec_hal < T;
+w_hal_hard(mask) = (da_parent_hal(mask).^2) ./ (dpp_ens_hal_1(mask).^2);
 
-T_fig2 = table( ...
-    [gm_ens_lal;   gm_ens_hal;   gm_ens_exdil], ...
-    [gsd_ens_lal;  gsd_ens_hal;  gsd_ens_exdil], ...
-    [ci_ens_lal(1); ci_ens_hal(1); ci_ens_exdil(1)], ...
-    [ci_ens_lal(2); ci_ens_hal(2); ci_ens_exdil(2)], ...
+w_exdil_hard = ones(size(dpp_ens_exdil));
+mask         = covvec_exdil < T;
+w_exdil_hard(mask) = (da_parent_exdil(mask).^2) ./ (dpp_ens_exdil(mask).^2);
+
+% Soft (logistic) are already computed earlier as: w_lal, w_hal, w_exdil
+% If not present, uncomment these lines:
+% alpha_lal   = 1 - 1 ./ (1 + exp(-(covvec_lal   - T)/k));
+% alpha_hal   = 1 - 1 ./ (1 + exp(-(covvec_hal   - T)/k));
+% alpha_exdil = 1 - 1 ./ (1 + exp(-(covvec_exdil - T)/k));
+% w_lal   = ((da_parent_lal  .^2) ./ (dpp_ens_lal_1.^2)) .^ alpha_lal;
+% w_hal   = ((da_parent_hal  .^2) ./ (dpp_ens_hal_1.^2)) .^ alpha_hal;
+% w_exdil = ((da_parent_exdil.^2) ./ (dpp_ens_exdil.^2)) .^ alpha_exdil;
+
+% ---------- 2) Compute ensemble stats for each method & condition ----------
+% Unweighted
+[gm_ens_lal_unw,  gsd_ens_lal_unw,  ci_ens_lal_unw]  = morph.geomstats(dpp_ens_lal_1(:),  w_lal_unw(:));
+[gm_ens_hal_unw,  gsd_ens_hal_unw,  ci_ens_hal_unw]  = morph.geomstats(dpp_ens_hal_1(:),  w_hal_unw(:));
+[gm_ens_exdil_unw,gsd_ens_exdil_unw,ci_ens_exdil_unw]= morph.geomstats(dpp_ens_exdil(:),  w_exdil_unw(:));
+
+% Hard
+[gm_ens_lal_hard,  gsd_ens_lal_hard,  ci_ens_lal_hard]  = morph.geomstats(dpp_ens_lal_1(:),  w_lal_hard(:));
+[gm_ens_hal_hard,  gsd_ens_hal_hard,  ci_ens_hal_hard]  = morph.geomstats(dpp_ens_hal_1(:),  w_hal_hard(:));
+[gm_ens_exdil_hard,gsd_ens_exdil_hard,ci_ens_exdil_hard]= morph.geomstats(dpp_ens_exdil(:),  w_exdil_hard(:));
+
+% Soft (your current logistic results already computed as gm_* / gsd_* / ci_*)
+[gm_ens_lal_soft,  gsd_ens_lal_soft,  ci_ens_lal_soft]  = morph.geomstats(dpp_ens_lal_1(:),  w_lal(:));
+[gm_ens_hal_soft,  gsd_ens_hal_soft,  ci_ens_hal_soft]  = morph.geomstats(dpp_ens_hal_1(:),  w_hal(:));
+[gm_ens_exdil_soft,gsd_ens_exdil_soft,ci_ens_exdil_soft]= morph.geomstats(dpp_ens_exdil(:),  w_exdil(:));
+
+% ---------- 3) Assemble long-format ENSEMBLE table (rows = condition × method) ----------
+Cond = categorical(repmat({'Lo-Aglom','Mod-Colaps','Hi-Aglom'}, 1, 3))';
+Meth = categorical([repmat({'Unweighted'},3,1); repmat({'Hard'},3,1); repmat({'Soft'},3,1)]);
+
+GM_ens  = [gm_ens_lal_unw;    gm_ens_hal_unw;    gm_ens_exdil_unw; ...
+           gm_ens_lal_hard;   gm_ens_hal_hard;   gm_ens_exdil_hard; ...
+           gm_ens_lal_soft;   gm_ens_hal_soft;   gm_ens_exdil_soft];
+
+GSD_ens = [gsd_ens_lal_unw;   gsd_ens_hal_unw;   gsd_ens_exdil_unw; ...
+           gsd_ens_lal_hard;  gsd_ens_hal_hard;  gsd_ens_exdil_hard; ...
+           gsd_ens_lal_soft;  gsd_ens_hal_soft;  gsd_ens_exdil_soft];
+
+CI_lo_ens = [ci_ens_lal_unw(1);  ci_ens_hal_unw(1);  ci_ens_exdil_unw(1); ...
+             ci_ens_lal_hard(1); ci_ens_hal_hard(1); ci_ens_exdil_hard(1); ...
+             ci_ens_lal_soft(1); ci_ens_hal_soft(1); ci_ens_exdil_soft(1)];
+
+CI_hi_ens = [ci_ens_lal_unw(2);  ci_ens_hal_unw(2);  ci_ens_exdil_unw(2); ...
+             ci_ens_lal_hard(2); ci_ens_hal_hard(2); ci_ens_exdil_hard(2); ...
+             ci_ens_lal_soft(2); ci_ens_hal_soft(2); ci_ens_exdil_soft(2)];
+
+T_fig2_ens_long = table(Cond, Meth, GM_ens, GSD_ens, CI_lo_ens, CI_hi_ens, ...
+    'VariableNames', {'Condition','Method','GM_dpp_Ens','GSD_dpp_Ens','CI95_lo_dpp_Ens','CI95_hi_dpp_Ens'});
+
+% ---------- 4) Keep your per-aggregate blocks as-is (unweighted across aggs) ----------
+% subplot 2: per-aggregate mean d_pp
+[gm_gmagg_lal, gsd_gmagg_lal, ci_gmagg_lal] = morph.geomstats(dbarpp_manu_lal_1);
+[gm_gmagg_hal, gsd_gmagg_hal, ci_gmagg_hal] = morph.geomstats(dbarpp_manu_hal_1);
+[gm_gmagg_exdil, gsd_gmagg_exdil, ci_gmagg_exdil] = morph.geomstats(dbarpp_manu_exdil);
+
+T_fig2_gmagg = table( ...
+    categorical({'Lo-Aglom';'Mod-Colaps';'Hi-Aglom'}), ...
     [gm_gmagg_lal;  gm_gmagg_hal;  gm_gmagg_exdil], ...
     [gsd_gmagg_lal; gsd_gmagg_hal; gsd_gmagg_exdil], ...
     [ci_gmagg_lal(1); ci_gmagg_hal(1); ci_gmagg_exdil(1)], ...
     [ci_gmagg_lal(2); ci_gmagg_hal(2); ci_gmagg_exdil(2)], ...
-    [gm_gsdagg_lal;   gm_gsdagg_hal;   gm_gsdagg_exdil], ...
-    [gsd_gsdagg_lal;  gsd_gsdagg_hal;  gsd_gsdagg_exdil], ...
+    'VariableNames', {'Condition','GM_dpp_GM','GSD_dpp_GM','CI95_lo_dpp_GM','CI95_hi_dpp_GM'});
+
+% subplot 3: per-aggregate sigma_pp
+[gm_gsdagg_lal, gsd_gsdagg_lal, ci_gsdagg_lal] = morph.geomstats(sigmapp_manu_lal_1);
+[gm_gsdagg_hal, gsd_gsdagg_hal, ci_gsdagg_hal] = morph.geomstats(sigmapp_manu_hal_1);
+[gm_gsdagg_exdil, gsd_gsdagg_exdil, ci_gsdagg_exdil] = morph.geomstats(sigmapp_manu_exdil);
+
+T_fig2_gsdagg = table( ...
+    categorical({'Lo-Aglom';'Mod-Colaps';'Hi-Aglom'}), ...
+    [gm_gsdagg_lal;  gm_gsdagg_hal;  gm_gsdagg_exdil], ...
+    [gsd_gsdagg_lal; gsd_gsdagg_hal; gsd_gsdagg_exdil], ...
     [ci_gsdagg_lal(1); ci_gsdagg_hal(1); ci_gsdagg_exdil(1)], ...
     [ci_gsdagg_lal(2); ci_gsdagg_hal(2); ci_gsdagg_exdil(2)], ...
-    'VariableNames', {...
-        'GM_dpp_Ens', 'GSD_dpp_Ens', 'CI95_lo_dpp_Ens', 'CI95_hi_dpp_Ens',...
-        'GM_dpp_GM', 'GSD_dpp_GM', 'CI95_lo_dpp_GM', 'CI95_hi_dpp_GM',...
-        'GM_dpp_GSD', 'GSD_dpp_GSD', 'CI95_lo_dpp_GSD', 'CI95_hi_dpp_GSD'},...
-    'RowNames', RowNames);
+    'VariableNames', {'Condition','GM_dpp_GSD','GSD_dpp_GSD','CI95_lo_dpp_GSD','CI95_hi_dpp_GSD'});
+
+% ---------- 5) (Optional) show all three tables nicely ----------
+disp(' ');
+disp('=== Figure 2 — Ensemble d_pp^(i) by Method (rows) ===');
+disp(T_fig2_ens_long);
 
 disp(' ');
-disp('=== Figure 2 summary (Geometric mean, geometric std. dev., and 95% CI) ===');
-disp(T_fig2);
+disp('=== Figure 2 — Per-aggregate mean d_pp (unweighted across aggregates) ===');
+disp(T_fig2_gmagg);
+
+disp(' ');
+disp('=== Figure 2 — Per-aggregate sigma_pp (unweighted across aggregates) ===');
+disp(T_fig2_gsdagg);
 
 %% da comparison subplot %%
 
