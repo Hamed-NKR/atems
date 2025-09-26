@@ -22,8 +22,7 @@ hf = struct(); % plot storage structure
 da = cat(1, Aggs.da); % area equivalent diameter
 ca = cat(1, Aggs.ca); % area equivalent circularity
 od = cat(1, Aggs.zbar_opt); % optical depth
-% cat(1, Aggs.sbar_opt);
-os = rand(n_agg_tot0,1); % optical sharpness
+os = cat(1, Aggs.sbar_opt); % optical sharpness
 
 % reload the morphological types
 for ind = 1 : n_agg_tot0
@@ -47,7 +46,7 @@ end
 % assign the number of bins if not given
 if ~exist('n_bin', 'var') || isempty(n_bin)
     n_bin = [10, 10, 10, 10];
-elseif length(n_bin) == 1
+elseif isscalar(n_bin)
     n_bin = repmat(n_bin, 1, 4);
 elseif length(n_bin(:)) ~= 4
     error(['Invalid bin nuumber set!', newline,...
@@ -139,7 +138,7 @@ end
 [~, od_da(:,2)] = sort(od_da(:,1)); % sort based on average optical...
     % ...depth for certain size bins
 
-%Century Gothic binning
+% Century Gothic binning
 for j = 1 : n_bin(2)
     if j == 1
         jj = ca < ca_bin(j+1);
