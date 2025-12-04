@@ -1373,4 +1373,3 @@ ii0_agg_uni = find(cat(1,Aggs_lal_1.n_subagg) == 1);
 dpp_uni = dbarpp_manu_lal_1(ii_pp_uni);
 GM_dpp_uni = geomean(dpp_uni);
 GSD_dpp_uni = morph.geostd(dpp_uni);
-
